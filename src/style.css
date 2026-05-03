@@ -1,0 +1,120 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  font-family: "Trebuchet MS", "Avenir Next", sans-serif;
+  background:
+    radial-gradient(circle at top, rgba(255, 232, 188, 0.65), transparent 30%),
+    linear-gradient(180deg, #f7ecd2 0%, #d8b07b 100%);
+  color: #2b190f;
+  --wood-dark: #7c5338;
+  --wood-mid: #a46d43;
+  --wood-light: #dcb98c;
+  --cream: #f8f0dd;
+  --ink: #2b190f;
+  --success: #2f8f5b;
+  --danger: #b53f32;
+  --warning: #d68a1c;
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+button {
+  cursor: pointer;
+}
+
+.wood-plank {
+  /*background: var(--wood-mid);*/
+}
+
+.soft-panel {
+  background: rgba(248, 240, 221, 0.88);
+  backdrop-filter: blur(12px);
+}
+
+.rat-sprite {
+  background-image: url('/images/rat.png');
+}
+
+.rat-pop {
+  animation: rat-pop 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cat-bop {
+  animation: cat-bop 220ms ease-out;
+}
+
+.rat-slot-top .rat-shell {
+  animation: rat-peek-top 190ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.rat-slot-bottom .rat-shell {
+  animation: rat-peek-bottom 190ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.rat-shell-top {
+  transform: translateX(-50%) translateY(-100%);
+}
+
+.rat-shell-bottom {
+  transform: translateX(-50%) translateY(0%);
+}
+
+@keyframes rat-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.88) translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes rat-peek-top {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-60%) scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-100%) scale(1);
+  }
+}
+
+@keyframes rat-peek-bottom {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-40%) scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0%) scale(1);
+  }
+}
+
+@keyframes cat-bop {
+  0% {
+    transform: scale(0.98);
+  }
+
+  60% {
+    transform: scale(1.06);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
