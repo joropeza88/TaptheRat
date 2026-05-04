@@ -49,10 +49,15 @@ button {
   animation: cat-bop 220ms ease-out;
 }
 
+.cat-idle {
+  transform-origin: center 72%;
+  animation: cat-idle 2.8s ease-in-out infinite;
+}
+
 .scratch-mark {
   width: 4.4rem;
   height: 4.4rem;
-  animation: scratch-burst 260ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation: scratch-burst 420ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 .bomb-burst {
@@ -134,7 +139,7 @@ button {
 }
 
 .rat-sprite-dying {
-  animation: rat-defeat 260ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation: rat-defeat 420ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   pointer-events: none;
 }
 
@@ -250,5 +255,27 @@ button {
 
   100% {
     transform: scale(1);
+  }
+}
+
+@keyframes cat-idle {
+  0% {
+    transform: translateY(0) rotate(-0.7deg) scale(0.995);
+  }
+
+  25% {
+    transform: translateY(-0.18rem) rotate(0deg) scale(1.01);
+  }
+
+  50% {
+    transform: translateY(0) rotate(0.7deg) scale(0.998);
+  }
+
+  75% {
+    transform: translateY(-0.14rem) rotate(0deg) scale(1.008);
+  }
+
+  100% {
+    transform: translateY(0) rotate(-0.7deg) scale(0.995);
   }
 }

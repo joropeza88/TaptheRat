@@ -25,8 +25,8 @@ export const RAT_CONFIG: Record<RatType, RatConfigEntry> = {
 
 export const GAME_CONFIG = {
   attackAnimationMs: 180,
-  ratDefeatAnimationMs: 260,
-  scratchAnimationMs: 260,
+  ratDefeatAnimationMs: 420,
+  scratchAnimationMs: 420,
   bombExplosionAnimationMs: 420,
   bombBlurOverlayMs: 2000,
   spawnIntervalMs: 680,

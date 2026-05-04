@@ -43,6 +43,18 @@ const spriteStyle = computed(() => ({
   backgroundPosition: `${-(props.cat.spriteFrame - 1) * 400}px 0px`,
   backgroundSize: '2800px 400px'
 }))
+
+const spriteAnimationClass = computed(() => {
+  if (props.cat.isAttacking) {
+    return 'cat-bop'
+  }
+
+  if (props.cat.spriteFrame === 1) {
+    return 'cat-idle'
+  }
+
+  return ''
+})
 </script>
 
 <template>
@@ -55,7 +67,7 @@ const spriteStyle = computed(() => ({
     >
       <div
         class="h-full w-full bg-no-repeat bg-gradient-to-b from-white/15 to-black/10 opacity-95 brightness-95 drop-shadow-sm"
-        :class="props.cat.isAttacking ? 'cat-bop' : ''"
+        :class="spriteAnimationClass"
         :style="spriteStyle"
       />
     </div>

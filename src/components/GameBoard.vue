@@ -55,6 +55,7 @@ function playBombSound() {
 
   const sound = bombSoundTemplate.cloneNode() as HTMLAudioElement
   sound.volume = bombSoundTemplate.volume
+  sound.currentTime = 0.18
   void sound.play().catch(() => {})
 }
 
