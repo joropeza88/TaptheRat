@@ -2,7 +2,12 @@ import { RAT_CONFIG } from '../config/gameConfig'
 import type { RatInstance, RatType, SpawnPoint } from '../models/Rat'
 import { uniqueId } from '../utils/random'
 
-export function createRat(type: RatType, spawnPoint: SpawnPoint, now: number): RatInstance {
+export function createRat(
+  type: RatType,
+  spawnPoint: SpawnPoint,
+  now: number,
+  visibleTimeMultiplier: number
+): RatInstance {
   const config = RAT_CONFIG[type]
   const xPercent = 14 + Math.random() * 72
 
@@ -15,6 +20,8 @@ export function createRat(type: RatType, spawnPoint: SpawnPoint, now: number): R
     health: config.health,
     maxHealth: config.health,
     points: config.points,
-    expiresAt: now + config.visibleTime
+    expiresAt: now + config.visibleTime * visibleTimeMultiplier,
+    isDying: false,
+    removeAt: null
   }
 }

@@ -41,3 +41,15 @@ npm run dev
 ```bash
 npm run build
 ```
+
+## Creditos
+
+Musica de fondo:
+
+
+Efectos de sonido:
+
+- Autor: DRAGON-STUDIO
+- Perfil: https://pixabay.com/es/users/dragon-studio-38165424/
+- Sound: Quick Swipe
+- Sound: Distant Bang

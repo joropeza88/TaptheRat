@@ -41,24 +41,101 @@ button {
   backdrop-filter: blur(12px);
 }
 
-.rat-sprite {
-  background-image: url('/images/rat.png');
-}
-
 .rat-pop {
-  animation: rat-pop 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: rat-pop 280ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .cat-bop {
   animation: cat-bop 220ms ease-out;
 }
 
+.scratch-mark {
+  width: 4rem;
+  height: 4rem;
+  animation: scratch-burst 260ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.bomb-burst {
+  width: 5rem;
+  height: 5rem;
+  transform: translate(-50%, -50%);
+  animation: bomb-burst 420ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.bomb-burst i,
+.bomb-burst b {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.bomb-burst b {
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 249, 214, 1) 0%, rgba(255, 184, 0, 0.95) 45%, rgba(255, 88, 0, 0.7) 75%, transparent 100%);
+  box-shadow: 0 0 20px rgba(255, 174, 0, 0.55);
+}
+
+.bomb-burst i {
+  width: 0.28rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 243, 186, 0.95), rgba(255, 85, 0, 0.15));
+  box-shadow: 0 0 12px rgba(255, 196, 0, 0.35);
+}
+
+.bomb-burst i:nth-child(1) {
+  transform: translate(-50%, -50%) rotate(0deg);
+}
+
+.bomb-burst i:nth-child(2) {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.bomb-burst i:nth-child(3) {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.bomb-burst i:nth-child(4) {
+  transform: translate(-50%, -50%) rotate(135deg);
+}
+
+.scratch-mark span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 3rem;
+  height: 0.18rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 248, 235, 0.1), rgba(255, 247, 231, 0.95), rgba(155, 22, 22, 0.7));
+  box-shadow: 0 0 10px rgba(255, 247, 231, 0.35);
+}
+
+.scratch-mark span:nth-child(1) {
+  transform: translate(-50%, -0.55rem) rotate(-18deg);
+}
+
+.scratch-mark span:nth-child(2) {
+  transform: translate(-50%, 0) rotate(-18deg);
+}
+
+.scratch-mark span:nth-child(3) {
+  transform: translate(-50%, 0.55rem) rotate(-18deg);
+}
+
 .rat-slot-top .rat-shell {
-  animation: rat-peek-top 190ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: rat-peek-top 320ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .rat-slot-bottom .rat-shell {
-  animation: rat-peek-bottom 190ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: rat-peek-bottom 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rat-sprite-dying {
+  animation: rat-defeat 260ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  pointer-events: none;
 }
 
 .rat-shell-top {
@@ -66,13 +143,13 @@ button {
 }
 
 .rat-shell-bottom {
-  transform: translateX(-50%) translateY(-4%);
+  transform: translateX(-50%) translateY(2.5%);
 }
 
 @keyframes rat-pop {
   from {
-    opacity: 0;
-    transform: scale(0.88) translateY(10px);
+    opacity: 0.18;
+    transform: scale(0.94) translateY(6px);
   }
 
   to {
@@ -83,8 +160,8 @@ button {
 
 @keyframes rat-peek-top {
   from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-60%) scale(0.92);
+    opacity: 0.12;
+    transform: translateX(-50%) translateY(-72%) scale(0.96);
   }
 
   to {
@@ -95,13 +172,70 @@ button {
 
 @keyframes rat-peek-bottom {
   from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-40%) scale(0.92);
+    opacity: 0.12;
+    transform: translateX(-50%) translateY(-28%) scale(0.96);
   }
 
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(-4%) scale(1);
+    transform: translateX(-50%) translateY(2.5%) scale(1);
+  }
+}
+
+@keyframes rat-defeat {
+  0% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+    filter: brightness(1);
+  }
+
+  35% {
+    opacity: 1;
+    transform: scale(1.12) rotate(-14deg);
+    filter: brightness(1.15);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.58) rotate(26deg);
+    filter: brightness(0.7) blur(1px);
+  }
+}
+
+@keyframes scratch-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.18);
+  }
+}
+
+@keyframes bomb-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.35);
+    filter: brightness(1.1);
+  }
+
+  25% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    filter: brightness(1.3);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.7);
+    filter: brightness(0.9);
   }
 }
 

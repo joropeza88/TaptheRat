@@ -1,4 +1,5 @@
-import { computed, ref } from 'vue'
+import { computed, type ComputedRef, ref } from 'vue'
+import { GAME_CONFIG } from '../config/gameConfig'
 import type { LevelConfig } from '../models/GameState'
 import type { RatInstance, SpawnPoint, SpawnSide } from '../models/Rat'
 import { pickRatType } from '../services/probabilityService'
@@ -19,9 +20,9 @@ function buildSpawnPoints(rows: number, activeSides: SpawnSide[]): SpawnPoint[] 
   ).flat()
 }
 
-export function useSpawnSystem(level: LevelConfig, rows: number) {
+export function useSpawnSystem(level: ComputedRef<LevelConfig>, rows: number) {
   const rats = ref<RatInstance[]>([])
-  const spawnPoints = ref<SpawnPoint[]>(buildSpawnPoints(rows, level.activeSides))
+  const spawnPoints = ref<SpawnPoint[]>(buildSpawnPoints(rows, level.value.activeSides))
 
   const activeRatCount = computed(() => rats.value.length)
 
@@ -35,11 +36,11 @@ export function useSpawnSystem(level: LevelConfig, rows: number) {
 
   function reset() {
     rats.value = []
-    spawnPoints.value = buildSpawnPoints(rows, level.activeSides)
+    spawnPoints.value = buildSpawnPoints(rows, level.value.activeSides)
   }
 
   function trySpawn(now: number) {
-    if (activeRatCount.value >= level.maxActiveRats) {
+    if (activeRatCount.value >= level.value.maxActiveRats) {
       return
     }
 
@@ -50,13 +51,22 @@ export function useSpawnSystem(level: LevelConfig, rows: number) {
     }
 
     const spawnPoint = randomItem(available)
-    const type = pickRatType(level.ratTypes)
-    rats.value = [...rats.value, createRat(type, spawnPoint, now)]
+    const type = pickRatType(level.value.ratTypes)
+    rats.value = [
+      ...rats.value,
+      createRat(type, spawnPoint, now, level.value.visibleTimeMultiplier)
+    ]
     syncOccupancy()
   }
 
   function removeExpired(now: number) {
-    const next = rats.value.filter((rat) => rat.expiresAt > now)
+    const next = rats.value.filter((rat) => {
+      if (rat.isDying && rat.removeAt !== null) {
+        return rat.removeAt > now
+      }
+
+      return rat.expiresAt > now
+    })
 
     if (next.length !== rats.value.length) {
       rats.value = next
@@ -76,24 +86,26 @@ export function useSpawnSystem(level: LevelConfig, rows: number) {
 
       hit = true
 
-      if (rat.type === 'trap') {
+      if (rat.type === 'bomb') {
         pointsDelta = rat.points
         defeatedRatId = rat.id
-        return []
+        return [
+          {
+            ...rat,
+            isDying: true,
+            removeAt: performance.now() + GAME_CONFIG.ratDefeatAnimationMs
+          }
+        ]
       }
 
-      const nextHealth = rat.health - 1
-
-      if (nextHealth <= 0) {
-        pointsDelta = rat.points
-        defeatedRatId = rat.id
-        return []
-      }
-
+      pointsDelta = rat.points
+      defeatedRatId = rat.id
       return [
         {
           ...rat,
-          health: nextHealth
+          health: 0,
+          isDying: true,
+          removeAt: performance.now() + GAME_CONFIG.ratDefeatAnimationMs
         }
       ]
     })

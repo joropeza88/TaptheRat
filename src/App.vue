@@ -6,7 +6,8 @@ import { LEVELS } from './game/config/levelsConfig'
 import type { GameScreen } from './game/models/GameState'
 import { useGameLoop } from './game/composables/useGameLoop'
 
-const level = LEVELS[0]
+const currentLevelIndex = ref(0)
+const level = computed(() => LEVELS[currentLevelIndex.value])
 const screen = ref<GameScreen>('home')
 const preloadProgress = ref(0)
 const game = useGameLoop(level)
@@ -59,9 +60,30 @@ function startGame() {
   startLoop()
 }
 
+function startCurrentLevel() {
+  game.resetGame()
+  screen.value = 'playing'
+  startLoop()
+}
+
+function retryLevel() {
+  startCurrentLevel()
+}
+
+function nextLevel() {
+  if (currentLevelIndex.value < LEVELS.length - 1) {
+    currentLevelIndex.value += 1
+    startCurrentLevel()
+    return
+  }
+
+  returnHome()
+}
+
 function returnHome() {
   stopLoop()
   game.resetGame()
+  currentLevelIndex.value = 0
   screen.value = 'home'
   beginPreload()
 }
@@ -69,9 +91,19 @@ function returnHome() {
 watch(
   () => game.isVictory.value,
   (value) => {
-    if (value) {
+    if (value && screen.value === 'playing') {
       stopLoop()
       screen.value = 'victory'
+    }
+  }
+)
+
+watch(
+  () => game.isDefeat.value,
+  (value) => {
+    if (value && screen.value === 'playing') {
+      stopLoop()
+      screen.value = 'defeat'
     }
   }
 )
@@ -139,9 +171,10 @@ onBeforeUnmount(() => {
       class="relative mx-auto min-h-screen w-full max-w-md overflow-hidden"
     >
       <GameHud
-        :level-number="1"
-        :score="game.score.value"
-        :target-score="game.targetScore"
+        :level-number="level.number"
+        :time-remaining-sec="game.timeRemainingSec.value"
+        :captures="game.captures.value"
+        :target-captures="game.targetCaptures.value"
         :progress="game.progress.value"
       >
         <template #left>
@@ -163,7 +196,7 @@ onBeforeUnmount(() => {
     </section>
 
     <section
-      v-else
+      v-else-if="screen === 'victory'"
       class="mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pb-6 pt-5"
     >
       <div
@@ -171,12 +204,40 @@ onBeforeUnmount(() => {
       >
         <div class="text-7xl">🏆</div>
         <p class="mt-5 text-xs font-black uppercase tracking-[0.4em] text-emerald-800/80">Victoria</p>
-        <h2 class="mt-3 text-3xl font-black text-[var(--ink)]">Meta alcanzada</h2>
+        <h2 class="mt-3 text-3xl font-black text-[var(--ink)]">Nivel superado</h2>
         <p class="mt-3 max-w-xs text-sm leading-6 text-emerald-950/80">
-          Terminaste el nivel con {{ game.score.value }} puntos. El gato se quedó con la alacena.
+          Capturaste {{ game.captures.value }} ratones en el tiempo límite del nivel {{ level.number }}.
         </p>
         <button
           class="mt-8 rounded-2xl bg-[var(--success)] px-6 py-4 text-base font-black text-white"
+          @click="currentLevelIndex < LEVELS.length - 1 ? nextLevel() : returnHome()"
+        >
+          {{ currentLevelIndex < LEVELS.length - 1 ? 'Siguiente nivel' : 'Salir al inicio' }}
+        </button>
+      </div>
+    </section>
+
+    <section
+      v-else
+      class="mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pb-6 pt-5"
+    >
+      <div
+        class="flex min-h-[calc(100vh-2.75rem)] flex-col items-center justify-center rounded-[36px] border border-white/45 bg-[linear-gradient(180deg,rgba(255,242,231,0.92),rgba(243,187,163,0.92))] p-6 text-center shadow-[0_22px_42px_rgba(73,42,20,0.18)]"
+      >
+        <div class="text-7xl">💥</div>
+        <p class="mt-5 text-xs font-black uppercase tracking-[0.4em] text-red-800/80">Derrota</p>
+        <h2 class="mt-3 text-3xl font-black text-[var(--ink)]">Tiempo agotado</h2>
+        <p class="mt-3 max-w-xs text-sm leading-6 text-red-950/80">
+          No alcanzaste las {{ level.goal.targetCaptures }} capturas del nivel {{ level.number }} a tiempo.
+        </p>
+        <button
+          class="mt-8 rounded-2xl bg-[var(--wood-dark)] px-6 py-4 text-base font-black text-white"
+          @click="retryLevel"
+        >
+          Repetir nivel
+        </button>
+        <button
+          class="mt-3 rounded-2xl border border-amber-950/15 bg-white/70 px-6 py-4 text-base font-black text-amber-950/80"
           @click="returnHome"
         >
           Salir al inicio

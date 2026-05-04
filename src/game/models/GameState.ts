@@ -1,7 +1,7 @@
 import type { RatType, SpawnSide } from './Rat'
 
 export type CatDirection = 'idle' | 'left' | 'right' | 'top' | 'bottom'
-export type GameScreen = 'home' | 'playing' | 'victory'
+export type GameScreen = 'home' | 'playing' | 'victory' | 'defeat'
 
 export interface AttackVector {
   x: number
@@ -17,15 +17,18 @@ export interface CatState {
 }
 
 export interface GoalConfig {
-  target: number
+  targetCaptures: number
+  timeLimitSec: number
 }
 
 export interface LevelConfig {
   id: string
+  number: number
   name: string
   goal: GoalConfig
   maxActiveRats: number
   spawnIntervalMs: number
+  visibleTimeMultiplier: number
   activeSides: SpawnSide[]
   ratTypes: Record<RatType, number>
 }

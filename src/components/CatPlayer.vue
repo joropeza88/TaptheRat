@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { CAT_MOTION_CONFIG } from '../game/config/gameConfig'
 import type { CatState } from '../game/models/GameState'
 
 const props = defineProps<{
@@ -17,17 +18,19 @@ const containerStyle = computed(() => {
 
   const clampedX = Math.max(-1, Math.min(1, vector.x))
   const clampedY = Math.max(-1, Math.min(1, vector.y))
-  let rowOffset = 0
-
-  if (props.cat.attackRow === 0) {
-    rowOffset = -7.6
-  } else if (props.cat.attackRow === 2) {
-    rowOffset = 7.6
-  } else if (props.cat.attackRow === 1) {
-    rowOffset = props.cat.direction === 'top' ? -2.4 : 2.4
-  }
-
-  const translateY = -0.35 - Math.max(0, -clampedY) * 0.35 + rowOffset
+  const motionKey =
+    props.cat.attackRow !== null ? `${props.cat.attackRow}-${props.cat.direction}` : null
+  const rowOffset =
+    motionKey && motionKey in CAT_MOTION_CONFIG.rowSideOffsetRem
+      ? CAT_MOTION_CONFIG.rowSideOffsetRem[
+          motionKey as keyof typeof CAT_MOTION_CONFIG.rowSideOffsetRem
+        ]
+      : 0
+  const upwardLift =
+    props.cat.direction === 'top'
+      ? -CAT_MOTION_CONFIG.upwardLiftRem - Math.max(0, -clampedY) * CAT_MOTION_CONFIG.upwardLiftFactorRem
+      : 0
+  const translateY = upwardLift + rowOffset
   const rotation = clampedX * 4.5
 
   return {
@@ -51,7 +54,7 @@ const spriteStyle = computed(() => ({
       :style="containerStyle"
     >
       <div
-        class="h-full w-full bg-no-repeat"
+        class="h-full w-full bg-no-repeat bg-gradient-to-b from-white/15 to-black/10 opacity-95 brightness-95 drop-shadow-sm"
         :class="props.cat.isAttacking ? 'cat-bop' : ''"
         :style="spriteStyle"
       />

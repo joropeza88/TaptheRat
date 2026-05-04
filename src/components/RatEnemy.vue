@@ -12,6 +12,10 @@ const emit = defineEmits<{
 function handleClick(event: MouseEvent) {
   emit('attack', props.rat.row, props.rat.side, event.clientX, event.clientY)
 }
+
+function spriteBackground(type: RatInstance['type']) {
+  return type === 'bomb' ? "url('/images/rat_bomb.png')" : "url('/images/rat.png')"
+}
 </script>
 
 <template>
@@ -21,9 +25,11 @@ function handleClick(event: MouseEvent) {
     :style="{ left: `${rat.xPercent}%` }"
   >
     <button
-      class="rat-pop rat-sprite h-[4.5rem] w-[4.5rem] bg-contain bg-center bg-no-repeat transition duration-100 active:scale-90"
-      :class="rat.side === 'bottom' ? 'scale-y-[-1]' : ''"
+      class="rat-pop rat-sprite h-[4.5rem] w-[4.5rem] bg-contain bg-center bg-no-repeat transition duration-100 active:scale-90 bg-gradient-to-b from-white/20 to-black/15 drop-shadow-md"
+      :class="[rat.side === 'bottom' ? 'scale-y-[-1]' : '', rat.isDying ? 'rat-sprite-dying' : '']"
+      :style="{ backgroundImage: spriteBackground(rat.type) }"
       aria-label="raton"
+      :disabled="rat.isDying"
       @click="handleClick"
     />
   </div>

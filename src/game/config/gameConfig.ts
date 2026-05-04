@@ -15,31 +15,38 @@ export const RAT_CONFIG: Record<RatType, RatConfigEntry> = {
     health: 1,
     label: 'Ratón normal'
   },
-  armored: {
-    points: 3,
-    visibleTime: 1500,
-    health: 2,
-    label: 'Ratón resistente'
-  },
-  fast: {
-    points: 4,
-    visibleTime: 700,
-    health: 1,
-    label: 'Ratón rápido'
-  },
-  trap: {
+  bomb: {
     points: -3,
     visibleTime: 1100,
     health: 1,
-    label: 'Ratón trampa'
+    label: 'Ratón bomba'
   }
 }
 
 export const GAME_CONFIG = {
   attackAnimationMs: 180,
+  ratDefeatAnimationMs: 260,
+  scratchAnimationMs: 260,
+  bombExplosionAnimationMs: 420,
+  bombBlurOverlayMs: 2000,
   spawnIntervalMs: 680,
   statusMessageMs: 900,
   boardRows: 3
+} as const
+
+export const LEVEL_SYSTEM_CONFIG = {
+  maxLevel: 13
+} as const
+
+export const CAT_MOTION_CONFIG = {
+  upwardLiftRem: 0.35,
+  upwardLiftFactorRem: 0.35,
+  rowSideOffsetRem: {
+    '0-top': -14,
+    '0-bottom': -8,
+    '1-top': -4,
+    '2-bottom': 9.2
+  } as const
 } as const
 
 export const SIDE_TO_DIRECTION: Record<SpawnSide, CatDirection> = {

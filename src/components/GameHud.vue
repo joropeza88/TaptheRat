@@ -1,8 +1,9 @@
 <script setup lang="ts">
 defineProps<{
   levelNumber: number
-  score: number
-  targetScore: number
+  timeRemainingSec: number
+  captures: number
+  targetCaptures: number
   progress: number
 }>()
 </script>
@@ -15,8 +16,8 @@ defineProps<{
         <h1 class="mt-1 text-2xl font-black text-[var(--ink)]">{{ levelNumber }}</h1>
       </div>
       <div class="pointer-events-auto rounded-2xl bg-[var(--wood-dark)] px-4 py-2 text-right text-[var(--cream)] shadow-[0_8px_20px_rgba(43,25,15,0.18)]">
-        <p class="text-[10px] uppercase tracking-[0.28em] text-amber-100/75">Puntos</p>
-        <p class="text-2xl font-black">{{ score }}</p>
+        <p class="text-[10px] uppercase tracking-[0.28em] text-amber-100/75">Tiempo</p>
+        <p class="text-2xl font-black">{{ timeRemainingSec }}s</p>
       </div>
     </header>
   </div>
@@ -28,8 +29,8 @@ defineProps<{
       </div>
       <div class="pointer-events-auto w-full max-w-[14rem] rounded-full bg-white/75 px-4 py-3 shadow-[0_8px_20px_rgba(43,25,15,0.12)] backdrop-blur-sm">
         <div class="mb-2 flex items-center justify-between text-sm font-semibold text-amber-900">
-          <span>Meta</span>
-          <span>{{ score }} / {{ targetScore }}</span>
+          <span>Capturas</span>
+          <span>{{ captures }} / {{ targetCaptures }}</span>
         </div>
         <div class="h-3 overflow-hidden rounded-full bg-amber-950/10">
           <div

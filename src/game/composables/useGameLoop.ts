@@ -1,8 +1,7 @@
-import { computed, ref } from 'vue'
+import { computed, type ComputedRef, ref } from 'vue'
 import { GAME_CONFIG, SIDE_TO_DIRECTION } from '../config/gameConfig'
 import type { AttackVector, CatState, LevelConfig } from '../models/GameState'
 import type { SpawnSide } from '../models/Rat'
-import { useScore } from './useScore'
 import { useSpawnSystem } from './useSpawnSystem'
 
 function resolveCatFrame(row: number, side: SpawnSide, attackVector: AttackVector): number {
@@ -27,7 +26,7 @@ function resolveCatFrame(row: number, side: SpawnSide, attackVector: AttackVecto
   return isLeft ? 4 : 5
 }
 
-export function useGameLoop(level: LevelConfig) {
+export function useGameLoop(level: ComputedRef<LevelConfig>) {
   const cat = ref<CatState>({
     direction: 'idle',
     isAttacking: false,
@@ -37,13 +36,19 @@ export function useGameLoop(level: LevelConfig) {
   })
   const statusMessage = ref('Toca un ratón para atacar.')
   const lastSpawnAt = ref(0)
+  const startAt = ref(0)
   const attackTimer = ref<number | null>(null)
   const statusTimer = ref<number | null>(null)
+  const captures = ref(0)
 
-  const scoreSystem = useScore(level.goal.target)
   const spawnSystem = useSpawnSystem(level, GAME_CONFIG.boardRows)
 
-  const isVictory = computed(() => scoreSystem.hasWon.value)
+  const targetCaptures = computed(() => level.value.goal.targetCaptures)
+  const progress = computed(() => Math.min(100, (captures.value / targetCaptures.value) * 100))
+  const isVictory = computed(() => captures.value >= targetCaptures.value)
+  const timeRemainingMs = ref(level.value.goal.timeLimitSec * 1000)
+  const timeRemainingSec = computed(() => Math.max(0, Math.ceil(timeRemainingMs.value / 1000)))
+  const isDefeat = computed(() => timeRemainingMs.value <= 0 && !isVictory.value)
 
   function clearTimers() {
     if (attackTimer.value) {
@@ -69,9 +74,11 @@ export function useGameLoop(level: LevelConfig) {
 
   function resetGame() {
     clearTimers()
-    scoreSystem.resetScore()
+    captures.value = 0
     spawnSystem.reset()
     lastSpawnAt.value = 0
+    startAt.value = 0
+    timeRemainingMs.value = level.value.goal.timeLimitSec * 1000
     cat.value = {
       direction: 'idle',
       isAttacking: false,
@@ -83,13 +90,18 @@ export function useGameLoop(level: LevelConfig) {
   }
 
   function tick(now: number) {
+    if (startAt.value === 0) {
+      startAt.value = now
+    }
+
+    timeRemainingMs.value = Math.max(0, level.value.goal.timeLimitSec * 1000 - (now - startAt.value))
     spawnSystem.removeExpired(now)
 
-    if (isVictory.value) {
+    if (isVictory.value || isDefeat.value) {
       return
     }
 
-    if (now - lastSpawnAt.value >= level.spawnIntervalMs) {
+    if (now - lastSpawnAt.value >= level.value.spawnIntervalMs) {
       spawnSystem.trySpawn(now)
       lastSpawnAt.value = now
     }
@@ -125,30 +137,27 @@ export function useGameLoop(level: LevelConfig) {
       return
     }
 
-    scoreSystem.addPoints(result.pointsDelta)
-
     if (result.pointsDelta < 0) {
-      setStatus(`${result.pointsDelta} puntos. Era una trampa.`)
+      setStatus('Bomba activada. Visibilidad reducida.')
       return
     }
 
-    if (result.pointsDelta === 0) {
-      setStatus('Ratón resistente dañado.')
-      return
-    }
+    captures.value += 1
 
-    setStatus(`+${result.pointsDelta} puntos.`)
+    setStatus(`Captura ${captures.value}/${targetCaptures.value}.`)
   }
 
   return {
     cat,
     rats: spawnSystem.rats,
     spawnPoints: spawnSystem.spawnPoints,
-    score: scoreSystem.score,
-    progress: scoreSystem.progress,
+    captures,
+    progress,
     statusMessage,
     isVictory,
-    targetScore: level.goal.target,
+    isDefeat,
+    timeRemainingSec,
+    targetCaptures,
     resetGame,
     tick,
     handleAttack

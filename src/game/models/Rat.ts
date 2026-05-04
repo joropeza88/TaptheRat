@@ -1,4 +1,4 @@
-export type RatType = 'normal' | 'armored' | 'fast' | 'trap'
+export type RatType = 'normal' | 'bomb'
 
 export type SpawnSide = 'left' | 'right' | 'top' | 'bottom'
 
@@ -20,4 +20,6 @@ export interface RatInstance {
   maxHealth: number
   points: number
   expiresAt: number
+  isDying: boolean
+  removeAt: number | null
 }
