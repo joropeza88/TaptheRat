@@ -139,11 +139,11 @@ button {
 }
 
 .rat-shell-top {
-  transform: translateX(-50%) translateY(-95%);
+  transform: translateX(-50%) translateY(-84%);
 }
 
 .rat-shell-bottom {
-  transform: translateX(-50%) translateY(1.5%);
+  transform: translateX(-50%) translateY(-10%);
 }
 
 @keyframes rat-pop {
@@ -166,7 +166,7 @@ button {
 
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(-95%) scale(1);
+    transform: translateX(-50%) translateY(-84%) scale(1);
   }
 }
 
@@ -178,7 +178,7 @@ button {
 
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(1.5%) scale(1);
+    transform: translateX(-50%) translateY(-10%) scale(1);
   }
 }
 

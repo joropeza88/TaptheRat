@@ -23,8 +23,8 @@ defineProps<{
   </div>
 
   <footer class="pointer-events-none absolute inset-x-0 bottom-0 z-40 px-4 pb-6">
-    <div class="relative flex min-h-14 items-end justify-center">
-      <div class="pointer-events-auto absolute left-0 bottom-0">
+    <div class="relative flex min-h-14 items-center justify-center">
+      <div class="pointer-events-auto absolute left-0 top-1/2 -translate-y-1/2">
         <slot name="left" />
       </div>
       <div class="pointer-events-auto w-full max-w-[14rem] rounded-full bg-white/75 px-4 py-3 shadow-[0_8px_20px_rgba(43,25,15,0.12)] backdrop-blur-sm">

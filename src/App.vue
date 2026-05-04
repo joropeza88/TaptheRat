@@ -20,6 +20,7 @@ const imageAssetsToPreload = [
   '/pwa-512x512.svg',
   '/images/cat_sprite.png',
   '/images/game.png',
+  '/images/out.png',
   '/images/rat.png',
   '/images/rat_bomb.png',
   '/images/table.png',
@@ -269,10 +270,10 @@ onBeforeUnmount(() => {
       >
         <template #left>
           <PressButton
-            class="rounded-2xl border border-amber-950/15 bg-white/75 px-4 py-3 text-sm font-bold text-amber-950/75 shadow-[0_8px_20px_rgba(43,25,15,0.12)] backdrop-blur-sm"
+            class="flex h-14 w-14 items-center justify-center rounded-full border border-amber-950/15 bg-white/75 shadow-[0_8px_20px_rgba(43,25,15,0.12)] backdrop-blur-sm"
             @click="returnHome"
           >
-            Salir
+            <img src="/images/out.png" alt="Salir" class="h-8 w-8 object-contain" />
           </PressButton>
         </template>
       </GameHud>
