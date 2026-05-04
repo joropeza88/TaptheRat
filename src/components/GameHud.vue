@@ -11,14 +11,54 @@ defineProps<{
 <template>
   <div class="pointer-events-none absolute inset-x-0 top-0 z-40 mt-9 px-4">
     <header class="flex items-start justify-between gap-4">
-      <div class="text-center">
-        <p class="text-xs font-black uppercase tracking-[0.35em] text-amber-950/70">Nivel</p>
-        <h1 class="mt-1 text-2xl font-black text-[var(--ink)]">{{ levelNumber }}</h1>
-      </div>
-      <div class="text-center pointer-events-auto rounded-2xl bg-[var(--wood-dark)] px-4 py-2 text-[var(--cream)] shadow-[0_8px_20px_rgba(43,25,15,0.18)]">
-        <p class="text-[10px] uppercase tracking-[0.28em] text-amber-100/75">Tiempo</p>
-        <p class="text-2xl font-black">{{ timeRemainingSec }}s</p>
-      </div>
+      
+      <button
+        class="
+          relative
+          h-16 w-40
+          rounded-full
+          bg-amber-800
+          shadow-[0_5px_0_#bb4d00,0_10px_14px_rgba(0,0,0,0.18)]
+          transition-all duration-150
+          flex items-center justify-end
+          pr-5
+        "
+      >
+        <!-- panel interior -->
+        <div
+          class="
+            absolute left-2 right-16 top-1/2 -translate-y-1/2
+            h-11
+            rounded-full
+            bg-[#f8f0dd]
+            shadow-inner
+            flex items-center justify-center
+            font-black text-xl tracking-wide text-[#6f4a2f]
+          "
+        >
+          NIVEL
+        </div>
+        <span class="relative z-10 text-xl font-black text-[#fff3fb]">{{ levelNumber }}</span>
+      </button>
+
+
+      <button
+        class="
+          relative
+          h-16 w-30
+          rounded-full
+          bg-[#f7f1dd]
+          border-4 border-amber-800 shadow-[0_4px_0_#bb4d00,0_14px_18px_rgba(0,0,0,0.18)]
+          transition-all duration-150
+          flex items-center justify-center
+        "
+      >
+        <span
+          class="font-black text-xl tracking-wide text-[#6f4a2f]"
+        >
+          {{ timeRemainingSec }}s
+        </span>
+      </button>
     </header>
   </div>
 

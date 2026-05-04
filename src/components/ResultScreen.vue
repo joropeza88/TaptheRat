@@ -25,7 +25,6 @@ defineProps<{
   title: string
   message: string
   primaryLabel: string
-  secondaryLabel?: string
   showShareButton?: boolean
   celebration?: boolean
 }>()
@@ -40,12 +39,7 @@ defineEmits<{
 <template>
   <section class="mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pb-6 pt-5">
     <div
-      class="relative overflow-hidden flex min-h-[calc(100vh-2.75rem)] flex-col items-center justify-center rounded-[36px] border border-white/45 p-6 text-center shadow-[0_22px_42px_rgba(73,42,20,0.18)]"
-      :class="
-        tone === 'victory'
-          ? 'bg-[linear-gradient(180deg,rgba(255,248,231,0.9),rgba(198,236,185,0.92))]'
-          : 'bg-[linear-gradient(180deg,rgba(255,242,231,0.92),rgba(243,187,163,0.92))]'
-      "
+      class="relative overflow-hidden flex min-h-[calc(100vh-2.75rem)] flex-col items-center justify-center rounded-[36px] border border-white/45 p-6 text-center shadow-[0_22px_42px_rgba(73,42,20,0.18)] bg-[url('/images/linebg.png')]"
     >
       <div v-if="celebration" class="pointer-events-none absolute inset-0 overflow-hidden">
         <div class="absolute left-1/2 top-1/2 h-0 w-0">
@@ -90,12 +84,14 @@ defineEmits<{
         {{ message }}
       </p>
       <PressButton
-        class="mt-8 rounded-2xl px-6 py-4 text-base font-black"
-        :class="
-          tone === 'victory'
-            ? 'bg-[var(--success)] text-white'
-            : 'bg-[var(--wood-dark)] text-white'
-        "
+        class="relative
+          h-16 w-50 mx-auto my-3
+          rounded-full font-black text-xl tracking-wide text-white
+          border-4 border-amber-800
+          shadow-[0_4px_0_#bb4d00,0_14px_18px_rgba(0,0,0,0.18)]
+          transition-all duration-150
+          flex items-center justify-center 
+          bg-gradient-to-b from-amber-500 to-amber-800"
         @click="$emit('primary')"
       >
         {{ primaryLabel }}
@@ -107,13 +103,6 @@ defineEmits<{
       >
         Compartir
       </button>
-      <PressButton
-        v-if="secondaryLabel"
-        class="mt-3 rounded-2xl border border-amber-950/15 bg-white/70 px-6 py-4 text-base font-black text-amber-950/80"
-        @click="$emit('secondary')"
-      >
-        {{ secondaryLabel }}
-      </PressButton>
     </div>
   </section>
 </template>

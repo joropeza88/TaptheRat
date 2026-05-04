@@ -69,8 +69,8 @@ button {
 
 .bomb-penalty-overlay {
   background:
-    radial-gradient(circle at center, rgba(43, 25, 15, 0.4) 0%, rgba(34, 19, 11, 0.54) 26%, rgba(23, 12, 8, 0.76) 58%, rgba(11, 6, 4, 0.92) 100%),
-    linear-gradient(180deg, rgba(24, 12, 8, 0.32), rgba(12, 6, 4, 0.52));
+    radial-gradient(circle at center, rgba(43, 25, 15, 0.48) 0%, rgba(34, 19, 11, 0.62) 26%, rgba(23, 12, 8, 0.82) 58%, rgba(11, 6, 4, 0.96) 100%),
+    linear-gradient(180deg, rgba(24, 12, 8, 0.38), rgba(12, 6, 4, 0.6));
   animation: bomb-penalty-pulse 360ms ease-out;
 }
 

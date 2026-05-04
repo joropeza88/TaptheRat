@@ -214,16 +214,8 @@ onBeforeUnmount(() => {
       v-if="screen === 'home'"
       class="relative mx-auto flex min-h-screen w-full max-w-md flex-col justify-center items-center overflow-hidden px-4 pb-8 pt-5 bg-[url('/images/game.png')] bg-cover bg-center"
     >
-      
-
-      <div class="pointer-events-none absolute left-1/2 top-3/4 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2">
-        <div
-          class="cat-idle h-full w-full bg-no-repeat opacity-95 brightness-95 drop-shadow-xl"
-          style="background-image: url('/images/cat_sprite.png'); background-position: -2400px 0; background-size: 2800px 400px;"
-        ></div>
-      </div> 
-
-      <div class="absolute inset-0 bg-stone-950/45" />
+    
+      <div class="absolute inset-0 bg-stone-950/20" />
 
       <div class="relative z-20 text-center text-white p-4">
 
@@ -234,7 +226,7 @@ onBeforeUnmount(() => {
           Captura los Ratones
         </h1>
         <p class="mt-4 max-w-sm text-sm leading-6 text-white/80">
-          {{ canPlay ? 'Golpea ratones, evita bombas y cumple la meta antes de que se acabe el tiempo.' : 'Cargando recursos...' }}
+          Golpea ratones, evita bombas y cumple la meta antes de que se acabe el tiempo.
         </p>
 
         <div class="mt-6 h-3 overflow-hidden rounded-full bg-amber-950/12">
@@ -244,18 +236,27 @@ onBeforeUnmount(() => {
           />
         </div>
         <div class="flex items-center justify-between text-xs font-black uppercase tracking-[0.24em">
-          <span>Precarga</span>
+          <span>{{ canPlay ? 'Listo' : 'Cargando recursos...' }}</span>
           <span>{{ preloadProgress }}%</span>
         </div>
         
-        
         <PressButton
-          class="mt-6 w-auto px-10 mx-auto rounded-full bg-white py-3 uppercase text-base text-black font-black transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+          type="button"
           :disabled="!canPlay"
+          class="
+          relative
+          h-16 w-30 mx-auto my-4
+          rounded-full font-black text-xl tracking-wide text-white
+          border-4 border-amber-800
+          shadow-[0_4px_0_#bb4d00,0_14px_18px_rgba(0,0,0,0.18)]
+          transition-all duration-150
+          flex items-center justify-center 
+          bg-gradient-to-b from-amber-500 to-amber-800"
           @click="startGame"
         >
           Jugar
         </PressButton>
+        
       </div>
     </section>
 
@@ -272,7 +273,14 @@ onBeforeUnmount(() => {
       >
         <template #left>
           <PressButton
-            class="flex h-14 w-14 items-center justify-center rounded-full border border-amber-950/15 bg-white/75 shadow-[0_8px_20px_rgba(43,25,15,0.12)] backdrop-blur-sm"
+            class="relative
+            h-14 w-14
+            rounded-full
+            bg-[#f7f1dd]
+            border-4 border-amber-800
+            shadow-[0_4px_0_#bb4d00,0_14px_18px_rgba(0,0,0,0.18)]
+            transition-all duration-150
+            flex items-center justify-center"
             @click="returnHome"
           >
             <img src="/images/out.png" alt="Salir" class="h-8 w-8 object-contain" />
@@ -296,10 +304,10 @@ onBeforeUnmount(() => {
       :title="isFinalLevel ? 'Juego completado' : 'Nivel superado'"
       :message="
         isFinalLevel
-          ? `Completaste los ${LEVELS.length} niveles y capturaste ${game.captures.value} ratones en el tramo final.`
-          : `Capturaste ${game.captures.value} ratones en el tiempo límite del nivel ${level.number}.`
+          ? `Completaste los ${LEVELS.length} niveles y capturaste todos ratones.`
+          : `Capturaste todos los ratones dentro del tiempo límite.`
       "
-      :primary-label="currentLevelIndex < LEVELS.length - 1 ? 'Siguiente nivel' : 'Salir al inicio'"
+      :primary-label="currentLevelIndex < LEVELS.length - 1 ? 'Siguiente nivel' : 'Salir'"
       :show-share-button="isFinalLevel"
       :celebration="isFinalLevel"
       @primary="currentLevelIndex < LEVELS.length - 1 ? nextLevel() : returnHome()"
@@ -312,9 +320,8 @@ onBeforeUnmount(() => {
       icon="💥"
       eyebrow="Derrota"
       title="Tiempo agotado"
-      :message="`No alcanzaste las ${level.goal.targetCaptures} capturas del nivel ${level.number} a tiempo.`"
-      primary-label="Repetir nivel"
-      secondary-label="Salir al inicio"
+      :message="`No alcanzaste a capturar todos los ratones a tiempo.`"
+      primary-label="Reintentar"
       @primary="retryLevel"
       @secondary="returnHome"
     />
