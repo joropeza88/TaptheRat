@@ -46,6 +46,9 @@ npm run build
 
 Musica de fondo:
 
+- Autor: AberrantRealities
+- Perfil: https://pixabay.com/es/users/aberrantrealities-38952538/
+- Music: Cartoon Confidence (Old Version)
 
 Efectos de sonido:
 
@@ -53,3 +56,8 @@ Efectos de sonido:
 - Perfil: https://pixabay.com/es/users/dragon-studio-38165424/
 - Sound: Quick Swipe
 - Sound: Distant Bang
+- Sound: Button Press 3
+
+- Autor: freesound_community 
+- Perfil: https://pixabay.com/es/users/freesound_community-46691455/
+- Sound: Applause, small audience

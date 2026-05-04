@@ -42,6 +42,7 @@ function playScratchSound() {
 
   const sound = clawSoundTemplate.cloneNode() as HTMLAudioElement
   sound.volume = clawSoundTemplate.volume
+  sound.currentTime = 0.18
   void sound.play().catch(() => {})
 }
 

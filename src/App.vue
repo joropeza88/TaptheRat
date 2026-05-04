@@ -2,6 +2,8 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import GameBoard from './components/GameBoard.vue'
 import GameHud from './components/GameHud.vue'
+import PressButton from './components/PressButton.vue'
+import ResultScreen from './components/ResultScreen.vue'
 import { LEVELS } from './game/config/levelsConfig'
 import type { GameScreen } from './game/models/GameState'
 import { useGameLoop } from './game/composables/useGameLoop'
@@ -12,9 +14,31 @@ const screen = ref<GameScreen>('home')
 const preloadProgress = ref(0)
 const game = useGameLoop(level)
 const rafId = ref<number | null>(null)
-const assetsToPreload = ['/favicon.svg', '/pwa-192x192.svg', '/pwa-512x512.svg']
+const imageAssetsToPreload = [
+  '/favicon.svg',
+  '/pwa-192x192.svg',
+  '/pwa-512x512.svg',
+  '/images/cat_sprite.png',
+  '/images/game.png',
+  '/images/rat.png',
+  '/images/rat_bomb.png',
+  '/images/table.png',
+  '/icons/192.png',
+  '/icons/512.png'
+]
+const soundAssetsToPreload = [
+  '/sounds/applause.mp3',
+  '/sounds/bomb.mp3',
+  '/sounds/button-press.mp3',
+  '/sounds/claw.mp3',
+  '/sounds/music.mp3'
+]
+const assetsToPreload = [...imageAssetsToPreload, ...soundAssetsToPreload]
+let backgroundMusic: HTMLAudioElement | null = null
+let applauseSound: HTMLAudioElement | null = null
 
 const canPlay = computed(() => preloadProgress.value >= 100)
+const isFinalLevel = computed(() => currentLevelIndex.value === LEVELS.length - 1)
 
 function animate() {
   game.tick(performance.now())
@@ -33,6 +57,52 @@ function stopLoop() {
   }
 }
 
+function ensureBackgroundMusic() {
+  if (!backgroundMusic) {
+    backgroundMusic = new Audio('/sounds/music.mp3')
+    backgroundMusic.loop = true
+    backgroundMusic.preload = 'auto'
+    backgroundMusic.volume = 0.45
+  }
+
+  return backgroundMusic
+}
+
+function playBackgroundMusic() {
+  const music = ensureBackgroundMusic()
+
+  if (!music.paused) {
+    return
+  }
+
+  void music.play().catch(() => {})
+}
+
+function stopBackgroundMusic() {
+  if (!backgroundMusic) {
+    return
+  }
+
+  backgroundMusic.pause()
+  backgroundMusic.currentTime = 0
+}
+
+function ensureApplauseSound() {
+  if (!applauseSound) {
+    applauseSound = new Audio('/sounds/applause.mp3')
+    applauseSound.preload = 'auto'
+    applauseSound.volume = 0.8
+  }
+
+  return applauseSound
+}
+
+function playApplauseSound() {
+  const applause = ensureApplauseSound()
+  applause.currentTime = 0
+  void applause.play().catch(() => {})
+}
+
 function beginPreload() {
   preloadProgress.value = 0
   let loaded = 0
@@ -43,13 +113,24 @@ function beginPreload() {
   }
 
   assetsToPreload.forEach((src) => {
-    const image = new Image()
-
-    image.onload = image.onerror = () => {
+    const done = () => {
       loaded += 1
       preloadProgress.value = Math.round((loaded / assetsToPreload.length) * 100)
     }
 
+    if (src.startsWith('/sounds/')) {
+      const audio = new Audio()
+      audio.preload = 'auto'
+      audio.onloadeddata = done
+      audio.onerror = done
+      audio.src = src
+      audio.load()
+      return
+    }
+
+    const image = new Image()
+    image.onload = done
+    image.onerror = done
     image.src = src
   })
 }
@@ -57,12 +138,14 @@ function beginPreload() {
 function startGame() {
   game.resetGame()
   screen.value = 'playing'
+  playBackgroundMusic()
   startLoop()
 }
 
 function startCurrentLevel() {
   game.resetGame()
   screen.value = 'playing'
+  playBackgroundMusic()
   startLoop()
 }
 
@@ -82,6 +165,7 @@ function nextLevel() {
 
 function returnHome() {
   stopLoop()
+  stopBackgroundMusic()
   game.resetGame()
   currentLevelIndex.value = 0
   screen.value = 'home'
@@ -93,6 +177,9 @@ watch(
   (value) => {
     if (value && screen.value === 'playing') {
       stopLoop()
+      if (isFinalLevel.value) {
+        playApplauseSound()
+      }
       screen.value = 'victory'
     }
   }
@@ -110,10 +197,13 @@ watch(
 
 onMounted(() => {
   beginPreload()
+  ensureBackgroundMusic()
+  ensureApplauseSound()
 })
 
 onBeforeUnmount(() => {
   stopLoop()
+  stopBackgroundMusic()
 })
 </script>
 
@@ -155,13 +245,13 @@ onBeforeUnmount(() => {
               :style="{ width: `${preloadProgress}%` }"
             />
           </div>
-          <button
+          <PressButton
             class="mt-4 w-full rounded-2xl bg-[var(--wood-dark)] px-5 py-4 text-base font-black text-[var(--cream)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
             :disabled="!canPlay"
             @click="startGame"
           >
             Jugar
-          </button>
+          </PressButton>
         </div>
       </div>
     </section>
@@ -178,12 +268,12 @@ onBeforeUnmount(() => {
         :progress="game.progress.value"
       >
         <template #left>
-          <button
+          <PressButton
             class="rounded-2xl border border-amber-950/15 bg-white/75 px-4 py-3 text-sm font-bold text-amber-950/75 shadow-[0_8px_20px_rgba(43,25,15,0.12)] backdrop-blur-sm"
             @click="returnHome"
           >
             Salir
-          </button>
+          </PressButton>
         </template>
       </GameHud>
 
@@ -195,54 +285,35 @@ onBeforeUnmount(() => {
       />
     </section>
 
-    <section
+    <ResultScreen
       v-else-if="screen === 'victory'"
-      class="mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pb-6 pt-5"
-    >
-      <div
-        class="flex min-h-[calc(100vh-2.75rem)] flex-col items-center justify-center rounded-[36px] border border-white/45 bg-[linear-gradient(180deg,rgba(255,248,231,0.9),rgba(198,236,185,0.92))] p-6 text-center shadow-[0_22px_42px_rgba(73,42,20,0.18)]"
-      >
-        <div class="text-7xl">🏆</div>
-        <p class="mt-5 text-xs font-black uppercase tracking-[0.4em] text-emerald-800/80">Victoria</p>
-        <h2 class="mt-3 text-3xl font-black text-[var(--ink)]">Nivel superado</h2>
-        <p class="mt-3 max-w-xs text-sm leading-6 text-emerald-950/80">
-          Capturaste {{ game.captures.value }} ratones en el tiempo límite del nivel {{ level.number }}.
-        </p>
-        <button
-          class="mt-8 rounded-2xl bg-[var(--success)] px-6 py-4 text-base font-black text-white"
-          @click="currentLevelIndex < LEVELS.length - 1 ? nextLevel() : returnHome()"
-        >
-          {{ currentLevelIndex < LEVELS.length - 1 ? 'Siguiente nivel' : 'Salir al inicio' }}
-        </button>
-      </div>
-    </section>
+      tone="victory"
+      icon="🏆"
+      eyebrow="Victoria"
+      :title="isFinalLevel ? 'Juego completado' : 'Nivel superado'"
+      :message="
+        isFinalLevel
+          ? `Completaste los ${LEVELS.length} niveles y capturaste ${game.captures.value} ratones en el tramo final.`
+          : `Capturaste ${game.captures.value} ratones en el tiempo límite del nivel ${level.number}.`
+      "
+      :primary-label="currentLevelIndex < LEVELS.length - 1 ? 'Siguiente nivel' : 'Salir al inicio'"
+      :show-share-button="isFinalLevel"
+      :celebration="isFinalLevel"
+      @primary="currentLevelIndex < LEVELS.length - 1 ? nextLevel() : returnHome()"
+      @share="() => {}"
+    />
 
-    <section
+    <ResultScreen
       v-else
-      class="mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pb-6 pt-5"
-    >
-      <div
-        class="flex min-h-[calc(100vh-2.75rem)] flex-col items-center justify-center rounded-[36px] border border-white/45 bg-[linear-gradient(180deg,rgba(255,242,231,0.92),rgba(243,187,163,0.92))] p-6 text-center shadow-[0_22px_42px_rgba(73,42,20,0.18)]"
-      >
-        <div class="text-7xl">💥</div>
-        <p class="mt-5 text-xs font-black uppercase tracking-[0.4em] text-red-800/80">Derrota</p>
-        <h2 class="mt-3 text-3xl font-black text-[var(--ink)]">Tiempo agotado</h2>
-        <p class="mt-3 max-w-xs text-sm leading-6 text-red-950/80">
-          No alcanzaste las {{ level.goal.targetCaptures }} capturas del nivel {{ level.number }} a tiempo.
-        </p>
-        <button
-          class="mt-8 rounded-2xl bg-[var(--wood-dark)] px-6 py-4 text-base font-black text-white"
-          @click="retryLevel"
-        >
-          Repetir nivel
-        </button>
-        <button
-          class="mt-3 rounded-2xl border border-amber-950/15 bg-white/70 px-6 py-4 text-base font-black text-amber-950/80"
-          @click="returnHome"
-        >
-          Salir al inicio
-        </button>
-      </div>
-    </section>
+      tone="defeat"
+      icon="💥"
+      eyebrow="Derrota"
+      title="Tiempo agotado"
+      :message="`No alcanzaste las ${level.goal.targetCaptures} capturas del nivel ${level.number} a tiempo.`"
+      primary-label="Repetir nivel"
+      secondary-label="Salir al inicio"
+      @primary="retryLevel"
+      @secondary="returnHome"
+    />
   </main>
 </template>
