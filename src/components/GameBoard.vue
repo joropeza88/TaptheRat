@@ -43,7 +43,7 @@ function playScratchSound() {
   }
 
   clawSoundTemplate.pause()
-  clawSoundTemplate.currentTime = 0.18
+  clawSoundTemplate.currentTime = 0
   void clawSoundTemplate.play().catch(() => {})
 }
 
@@ -55,7 +55,7 @@ function playBombSound() {
   }
 
   bombSoundTemplate.pause()
-  bombSoundTemplate.currentTime = 0.18
+  bombSoundTemplate.currentTime = 0
   void bombSoundTemplate.play().catch(() => {})
 }
 

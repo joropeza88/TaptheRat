@@ -212,9 +212,17 @@ onBeforeUnmount(() => {
   <main class="min-h-screen w-full">
     <section
       v-if="screen === 'home'"
-      class="relative mx-auto flex min-h-screen w-full max-w-md flex-col justify-center items-center overflow-hidden px-4 pb-8 pt-5 bg-[url('/images/game.png')] bg-cover bg-center"
+      class="relative mx-auto flex min-h-screen w-full max-w-md flex-col justify-center items-center overflow-hidden px-4 pb-8 pt-5"
     >
-    
+      <!-- Fondo lejano -->
+      <div class="absolute inset-0 
+                  bg-[url('/images/game.png')] 
+                  bg-cover 
+                  bg-center
+                  opacity-50
+                  scale-105
+                  z-0">
+      </div>
       <div class="absolute inset-0 bg-stone-950/20" />
 
       <div class="relative z-20 text-center text-white p-4">

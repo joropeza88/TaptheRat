@@ -9,7 +9,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="pointer-events-none absolute inset-x-0 top-0 z-40 mt-9 px-4">
+  <div class="pointer-events-none absolute inset-x-0 top-10 z-40 px-4">
     <header class="flex items-start justify-between gap-4">
       
       <button
@@ -62,12 +62,19 @@ defineProps<{
     </header>
   </div>
 
-  <footer class="pointer-events-none absolute inset-x-0 bottom-0 z-40 px-4 pb-6">
+  <footer class="pointer-events-none absolute inset-x-0 bottom-6 z-40 px-4">
     <div class="relative flex min-h-14 items-center justify-center">
       <div class="pointer-events-auto absolute left-0 top-1/2 -translate-y-1/2">
         <slot name="left" />
       </div>
-      <div class="pointer-events-auto w-full max-w-[14rem] rounded-full bg-white/75 px-4 py-3 shadow-[0_8px_20px_rgba(43,25,15,0.12)] backdrop-blur-sm">
+      <div class="pointer-events-auto w-full max-w-[14rem]
+        rounded-full
+        bg-white/30
+        px-4 py-3
+        backdrop-blur-xl
+        border border-white/40
+        shadow-[0_8px_30px_rgba(0,0,0,0.12)]
+        ">
         <div class="mb-2 flex items-center justify-between text-sm font-semibold text-amber-900">
           <span>Capturas</span>
           <span>{{ captures }} / {{ targetCaptures }}</span>
