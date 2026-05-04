@@ -212,48 +212,50 @@ onBeforeUnmount(() => {
   <main class="min-h-screen w-full">
     <section
       v-if="screen === 'home'"
-      class="mx-auto flex min-h-screen w-full max-w-md flex-col justify-between px-4 pb-6 pt-5"
+      class="relative mx-auto flex min-h-screen w-full max-w-md flex-col justify-center items-center overflow-hidden px-4 pb-8 pt-5 bg-[url('/images/game.png')] bg-cover bg-center"
     >
-      <div class="flex min-h-[calc(100vh-2.75rem)] flex-col justify-between rounded-[36px] border border-white/45 bg-[linear-gradient(180deg,rgba(255,248,231,0.88),rgba(226,187,133,0.92))] p-6 shadow-[0_22px_42px_rgba(73,42,20,0.18)]">
-        <div>
-          <p class="text-xs font-black uppercase tracking-[0.38em] text-amber-800/75">Cabinet Mode</p>
-          <h1 class="mt-3 text-4xl font-black leading-none text-[var(--ink)]">Tap the Rat</h1>
-          <p class="mt-4 max-w-sm text-sm leading-6 text-amber-950/80">
-            Golpea ratones, evita trampas y alcanza la meta dentro de esta alacena caótica.
-          </p>
-        </div>
+      
 
-        <div class="relative mt-8 flex flex-1 items-center justify-center">
-          <div class="cabinet-shadow relative flex h-[22rem] w-full max-w-sm items-center justify-center overflow-hidden rounded-[34px] border border-white/50 bg-[linear-gradient(180deg,#cf9a68_0%,#8e5d3b_100%)]">
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,245,213,0.25),transparent_32%)]" />
-            <div class="absolute inset-x-5 top-[5.5rem] h-6 rounded-full wood-plank" />
-            <div class="absolute inset-x-5 top-[10.5rem] h-6 rounded-full wood-plank" />
-            <div class="absolute inset-x-5 bottom-[5.5rem] h-6 rounded-full wood-plank" />
-            <div class="absolute left-7 top-[6.5rem] text-4xl">🐭</div>
-            <div class="absolute right-7 bottom-[6.5rem] text-4xl">🧨</div>
-            <div class="cat-bop text-8xl">🐱</div>
-          </div>
-        </div>
+      <div class="pointer-events-none absolute left-1/2 top-3/4 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2">
+        <div
+          class="cat-idle h-full w-full bg-no-repeat opacity-95 brightness-95 drop-shadow-xl"
+          style="background-image: url('/images/cat_sprite.png'); background-position: -2400px 0; background-size: 2800px 400px;"
+        ></div>
+      </div> 
 
-        <div class="soft-panel rounded-[28px] border border-white/50 p-4">
-          <div class="flex items-center justify-between text-xs font-black uppercase tracking-[0.24em] text-amber-800/75">
-            <span>Precarga</span>
-            <span>{{ preloadProgress }}%</span>
-          </div>
-          <div class="mt-3 h-3 overflow-hidden rounded-full bg-amber-950/10">
-            <div
-              class="h-full rounded-full bg-gradient-to-r from-orange-400 via-amber-500 to-lime-500 transition-[width] duration-150"
-              :style="{ width: `${preloadProgress}%` }"
-            />
-          </div>
-          <PressButton
-            class="mt-4 w-full rounded-2xl bg-[var(--wood-dark)] px-5 py-4 text-base font-black text-[var(--cream)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
-            :disabled="!canPlay"
-            @click="startGame"
-          >
-            Jugar
-          </PressButton>
+      <div class="absolute inset-0 bg-stone-950/45" />
+
+      <div class="relative z-20 text-center text-white p-4">
+
+        <p class="text-sm font-semibold uppercase tracking-[0.45em] text-amber-950/80">
+          Tap the Rat
+        </p>
+        <h1 class="mt-4 text-5xl font-black tracking-tight">
+          Captura los Ratones
+        </h1>
+        <p class="mt-4 max-w-sm text-sm leading-6 text-white/80">
+          {{ canPlay ? 'Golpea ratones, evita bombas y cumple la meta antes de que se acabe el tiempo.' : 'Cargando recursos...' }}
+        </p>
+
+        <div class="mt-6 h-3 overflow-hidden rounded-full bg-amber-950/12">
+          <div
+            class="h-full rounded-full bg-gradient-to-r from-orange-400 via-amber-500 to-lime-500 transition-[width] duration-150"
+            :style="{ width: `${preloadProgress}%` }"
+          />
         </div>
+        <div class="flex items-center justify-between text-xs font-black uppercase tracking-[0.24em">
+          <span>Precarga</span>
+          <span>{{ preloadProgress }}%</span>
+        </div>
+        
+        
+        <PressButton
+          class="mt-6 w-auto px-10 mx-auto rounded-full bg-white py-3 uppercase text-base text-black font-black transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+          :disabled="!canPlay"
+          @click="startGame"
+        >
+          Jugar
+        </PressButton>
       </div>
     </section>
 

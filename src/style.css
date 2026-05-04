@@ -61,10 +61,17 @@ button {
 }
 
 .bomb-burst {
-  width: 5rem;
-  height: 5rem;
+  width: 5.8rem;
+  height: 5.8rem;
   transform: translate(-50%, -50%);
   animation: bomb-burst 420ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.bomb-penalty-overlay {
+  background:
+    radial-gradient(circle at center, rgba(43, 25, 15, 0.4) 0%, rgba(34, 19, 11, 0.54) 26%, rgba(23, 12, 8, 0.76) 58%, rgba(11, 6, 4, 0.92) 100%),
+    linear-gradient(180deg, rgba(24, 12, 8, 0.32), rgba(12, 6, 4, 0.52));
+  animation: bomb-penalty-pulse 360ms ease-out;
 }
 
 .bomb-burst i,
@@ -191,19 +198,16 @@ button {
   0% {
     opacity: 1;
     transform: scale(1) rotate(0deg);
-    filter: brightness(1);
   }
 
   35% {
     opacity: 1;
     transform: scale(1.12) rotate(-14deg);
-    filter: brightness(1.15);
   }
 
   100% {
     opacity: 0;
     transform: scale(0.58) rotate(26deg);
-    filter: brightness(0.7) blur(1px);
   }
 }
 
@@ -241,6 +245,16 @@ button {
     opacity: 0;
     transform: translate(-50%, -50%) scale(1.7);
     filter: brightness(0.9);
+  }
+}
+
+@keyframes bomb-penalty-pulse {
+  0% {
+    opacity: 0.15;
+  }
+
+  100% {
+    opacity: 1;
   }
 }
 

@@ -34,9 +34,8 @@ function ensureSound() {
 }
 
 function playSound() {
-  const template = ensureSound()
-  const sound = template.cloneNode() as HTMLAudioElement
-  sound.volume = template.volume
+  const sound = ensureSound()
+  sound.pause()
   sound.currentTime = 0.18
   void sound.play().catch(() => {})
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import CatPlayer from './CatPlayer.vue'
 import SpawnPoint from './SpawnPoint.vue'
 import { GAME_CONFIG } from '../game/config/gameConfig'
@@ -24,6 +24,8 @@ const bombOverlayActive = ref(false)
 let clawSoundTemplate: HTMLAudioElement | null = null
 let bombSoundTemplate: HTMLAudioElement | null = null
 let bombOverlayTimer: number | null = null
+const scratchTimers = new Set<number>()
+const explosionTimers = new Set<number>()
 
 function pointFor(row: number, side: SpawnPointModel['side']) {
   return props.spawnPoints.find((point) => point.row === row && point.side === side)
@@ -40,10 +42,9 @@ function playScratchSound() {
     clawSoundTemplate.volume = 0.8
   }
 
-  const sound = clawSoundTemplate.cloneNode() as HTMLAudioElement
-  sound.volume = clawSoundTemplate.volume
-  sound.currentTime = 0.18
-  void sound.play().catch(() => {})
+  clawSoundTemplate.pause()
+  clawSoundTemplate.currentTime = 0.18
+  void clawSoundTemplate.play().catch(() => {})
 }
 
 function playBombSound() {
@@ -53,10 +54,9 @@ function playBombSound() {
     bombSoundTemplate.volume = 0.9
   }
 
-  const sound = bombSoundTemplate.cloneNode() as HTMLAudioElement
-  sound.volume = bombSoundTemplate.volume
-  sound.currentTime = 0.18
-  void sound.play().catch(() => {})
+  bombSoundTemplate.pause()
+  bombSoundTemplate.currentTime = 0.18
+  void bombSoundTemplate.play().catch(() => {})
 }
 
 function addScratch(clientX: number, clientY: number, rect: DOMRect) {
@@ -68,9 +68,12 @@ function addScratch(clientX: number, clientY: number, rect: DOMRect) {
   scratches.value = [...scratches.value, { id, x, y, rotate }]
   playScratchSound()
 
-  window.setTimeout(() => {
+  const timer = window.setTimeout(() => {
     scratches.value = scratches.value.filter((scratch) => scratch.id !== id)
+    scratchTimers.delete(timer)
   }, GAME_CONFIG.scratchAnimationMs)
+
+  scratchTimers.add(timer)
 }
 
 function addExplosion(clientX: number, clientY: number, rect: DOMRect) {
@@ -81,9 +84,12 @@ function addExplosion(clientX: number, clientY: number, rect: DOMRect) {
   explosions.value = [...explosions.value, { id, x, y }]
   playBombSound()
 
-  window.setTimeout(() => {
+  const timer = window.setTimeout(() => {
     explosions.value = explosions.value.filter((explosion) => explosion.id !== id)
+    explosionTimers.delete(timer)
   }, GAME_CONFIG.bombExplosionAnimationMs)
+
+  explosionTimers.add(timer)
 }
 
 function triggerBombOverlay() {
@@ -111,11 +117,11 @@ function handleAttack(row: number, side: SpawnPointModel['side'], clientX: numbe
   const centerY = rect.top + rect.height / 2
   const rat = ratFor(row, side)
 
-  addScratch(clientX, clientY, rect)
-
   if (rat?.type === 'bomb') {
     addExplosion(clientX, clientY, rect)
     triggerBombOverlay()
+  } else {
+    addScratch(clientX, clientY, rect)
   }
 
   emit('attack', row, side, {
@@ -123,6 +129,22 @@ function handleAttack(row: number, side: SpawnPointModel['side'], clientX: numbe
     y: (clientY - centerY) / (rect.height / 2)
   })
 }
+
+onBeforeUnmount(() => {
+  scratchTimers.forEach((timer) => window.clearTimeout(timer))
+  explosionTimers.forEach((timer) => window.clearTimeout(timer))
+  scratchTimers.clear()
+  explosionTimers.clear()
+
+  if (bombOverlayTimer !== null) {
+    window.clearTimeout(bombOverlayTimer)
+    bombOverlayTimer = null
+  }
+
+  scratches.value = []
+  explosions.value = []
+  bombOverlayActive.value = false
+})
 </script>
 
 <template>
@@ -135,15 +157,16 @@ function handleAttack(row: number, side: SpawnPointModel['side'], clientX: numbe
                 bg-[url('/images/game.png')] 
                 bg-cover 
                 bg-center
-                opacity-50 blur-[2px] 
+                opacity-50
                 scale-105
                 z-0">
     </div>
     <div
       class="pointer-events-none absolute inset-0 z-40 transition-opacity duration-300"
       :class="bombOverlayActive ? 'opacity-100' : 'opacity-0'"
-      style="background: rgba(32, 19, 14, 0.34); backdrop-filter: blur(10px);"
-    />
+    >
+      <div class="bomb-penalty-overlay absolute inset-0" />
+    </div>
     <div class="relative flex h-full flex-col justify-center gap-12 pt-28 pb-28">
       <div
         v-for="row in rows"
