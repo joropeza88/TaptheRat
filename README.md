@@ -61,3 +61,8 @@ Efectos de sonido:
 - Autor: freesound_community 
 - Perfil: https://pixabay.com/es/users/freesound_community-46691455/
 - Sound: Applause, small audience
+
+- Autor: floraphonic 
+- Perfil: https://pixabay.com/es/users/floraphonic-38928062/
+- Sound: Classic Game Action Positive 1
+- Sound: Classic Game Action Negative 9
