@@ -33,11 +33,16 @@ const soundAssetsToPreload = [
   '/sounds/bomb.mp3',
   '/sounds/button-press.mp3',
   '/sounds/claw.mp3',
-  '/sounds/music.mp3'
+  '/sounds/lose.mp3',
+  '/sounds/music.mp3',
+  '/sounds/victory.mp3'
 ]
 const assetsToPreload = [...imageAssetsToPreload, ...soundAssetsToPreload]
 let backgroundMusic: HTMLAudioElement | null = null
 let applauseSound: HTMLAudioElement | null = null
+let levelVictorySound: HTMLAudioElement | null = null
+let loseSound: HTMLAudioElement | null = null
+let resultScreenTimer: number | null = null
 
 const canPlay = computed(() => preloadProgress.value >= 100)
 const isFinalLevel = computed(() => currentLevelIndex.value === LEVELS.length - 1)
@@ -56,6 +61,13 @@ function stopLoop() {
   if (rafId.value !== null) {
     window.cancelAnimationFrame(rafId.value)
     rafId.value = null
+  }
+}
+
+function clearResultScreenTimer() {
+  if (resultScreenTimer !== null) {
+    window.clearTimeout(resultScreenTimer)
+    resultScreenTimer = null
   }
 }
 
@@ -105,6 +117,38 @@ function playApplauseSound() {
   void applause.play().catch(() => {})
 }
 
+function ensureLevelVictorySound() {
+  if (!levelVictorySound) {
+    levelVictorySound = new Audio('/sounds/victory.mp3')
+    levelVictorySound.preload = 'auto'
+    levelVictorySound.volume = 0.8
+  }
+
+  return levelVictorySound
+}
+
+function playLevelVictorySound() {
+  const victory = ensureLevelVictorySound()
+  victory.currentTime = 0
+  void victory.play().catch(() => {})
+}
+
+function ensureLoseSound() {
+  if (!loseSound) {
+    loseSound = new Audio('/sounds/lose.mp3')
+    loseSound.preload = 'auto'
+    loseSound.volume = 0.8
+  }
+
+  return loseSound
+}
+
+function playLoseSound() {
+  const lose = ensureLoseSound()
+  lose.currentTime = 0
+  void lose.play().catch(() => {})
+}
+
 function beginPreload() {
   preloadProgress.value = 0
   let loaded = 0
@@ -138,6 +182,7 @@ function beginPreload() {
 }
 
 function startGame() {
+  clearResultScreenTimer()
   game.resetGame()
   screen.value = 'playing'
   playBackgroundMusic()
@@ -145,6 +190,7 @@ function startGame() {
 }
 
 function startCurrentLevel() {
+  clearResultScreenTimer()
   game.resetGame()
   screen.value = 'playing'
   playBackgroundMusic()
@@ -166,6 +212,7 @@ function nextLevel() {
 }
 
 function returnHome() {
+  clearResultScreenTimer()
   stopLoop()
   stopBackgroundMusic()
   game.resetGame()
@@ -179,10 +226,19 @@ watch(
   (value) => {
     if (value && screen.value === 'playing') {
       stopLoop()
+      clearResultScreenTimer()
+
       if (isFinalLevel.value) {
         playApplauseSound()
+        screen.value = 'victory'
+        return
       }
-      screen.value = 'victory'
+
+      resultScreenTimer = window.setTimeout(() => {
+        playLevelVictorySound()
+        screen.value = 'victory'
+        resultScreenTimer = null
+      }, 1000)
     }
   }
 )
@@ -191,7 +247,9 @@ watch(
   () => game.isDefeat.value,
   (value) => {
     if (value && screen.value === 'playing') {
+      clearResultScreenTimer()
       stopLoop()
+      playLoseSound()
       screen.value = 'defeat'
     }
   }
@@ -201,9 +259,12 @@ onMounted(() => {
   beginPreload()
   ensureBackgroundMusic()
   ensureApplauseSound()
+  ensureLevelVictorySound()
+  ensureLoseSound()
 })
 
 onBeforeUnmount(() => {
+  clearResultScreenTimer()
   stopLoop()
   stopBackgroundMusic()
 })
