@@ -9,7 +9,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="pointer-events-none absolute inset-x-0 top-10 z-40 px-4">
+  <div class="pointer-events-none absolute inset-x-0 top-12 z-40 px-4">
     <header class="flex items-start justify-between gap-4">
       
       <button

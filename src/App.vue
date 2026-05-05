@@ -20,6 +20,7 @@ const imageAssetsToPreload = [
   '/pwa-512x512.svg',
   '/images/cat_sprite.png',
   '/images/game.png',
+  '/images/splash_screen.png',
   '/images/out.png',
   '/images/rat.png',
   '/images/rat_bomb.png',
@@ -212,59 +213,54 @@ onBeforeUnmount(() => {
   <main class="min-h-screen w-full">
     <section
       v-if="screen === 'home'"
-      class="relative mx-auto flex min-h-screen w-full max-w-md flex-col justify-center items-center overflow-hidden px-4 pb-8 pt-5"
+      class="mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pb-6 pt-5"
     >
-      <!-- Fondo lejano -->
-      <div class="absolute inset-0 
-                  bg-[url('/images/game.png')] 
-                  bg-cover 
-                  bg-center
-                  opacity-50
-                  scale-105
-                  z-0">
-      </div>
-      <div class="absolute inset-0 bg-stone-950/20" />
+      <div class="relative overflow-hidden flex min-h-[calc(100vh-2.75rem)] flex-col items-center justify-center rounded-[36px] border border-white/45 p-6 text-center shadow-[0_22px_42px_rgba(73,42,20,0.18)] bg-[url('/images/linebg.png')]">
 
-      <div class="relative z-20 text-center text-white p-4">
+          <div class="absolute inset-0 pointer-events-none bg-[url('/images/splash_screen.png')] bg-no-repeat bg-center bg-cover"></div>
+          
+          <div class="relative z-20 text-center text-white p-4">
 
-        <p class="text-sm font-semibold uppercase tracking-[0.45em] text-amber-950/80">
-          Tap the Rat
-        </p>
-        <h1 class="mt-4 text-5xl font-black tracking-tight">
-          Captura los Ratones
-        </h1>
-        <p class="mt-4 max-w-sm text-sm leading-6 text-white/80">
-          Golpea ratones, evita bombas y cumple la meta antes de que se acabe el tiempo.
-        </p>
+            <p class="text-sm font-semibold uppercase tracking-[0.45em] text-amber-950/80">
+              Tap the Rat
+            </p>
+            <h1 class="mt-4 text-5xl font-black tracking-tight">
+              Captura los Ratones
+            </h1>
+            <p class="mt-4 max-w-sm text-sm leading-6 text-white/80">
+              Golpea ratones, evita bombas y cumple la meta antes de que se acabe el tiempo.
+            </p>
 
-        <div class="mt-6 h-3 overflow-hidden rounded-full bg-amber-950/12">
-          <div
-            class="h-full rounded-full bg-gradient-to-r from-orange-400 via-amber-500 to-lime-500 transition-[width] duration-150"
-            :style="{ width: `${preloadProgress}%` }"
-          />
-        </div>
-        <div class="flex items-center justify-between text-xs font-black uppercase tracking-[0.24em">
-          <span>{{ canPlay ? 'Listo' : 'Cargando recursos...' }}</span>
-          <span>{{ preloadProgress }}%</span>
-        </div>
-        
-        <PressButton
-          type="button"
-          :disabled="!canPlay"
-          class="
-          relative
-          h-16 w-30 mx-auto my-4
-          rounded-full font-black text-xl tracking-wide text-white
-          border-4 border-amber-800
-          shadow-[0_4px_0_#bb4d00,0_14px_18px_rgba(0,0,0,0.18)]
-          transition-all duration-150
-          flex items-center justify-center 
-          bg-gradient-to-b from-amber-500 to-amber-800"
-          @click="startGame"
-        >
-          Jugar
-        </PressButton>
-        
+            <div class="mt-6 h-3 overflow-hidden rounded-full bg-amber-950/12">
+              <div
+                class="h-full rounded-full bg-gradient-to-r from-orange-400 via-amber-500 to-lime-500 transition-[width] duration-150"
+                :style="{ width: `${preloadProgress}%` }"
+              />
+            </div>
+            <div class="flex items-center justify-between text-xs font-black uppercase tracking-[0.24em">
+              <span>{{ canPlay ? 'Listo' : 'Cargando recursos...' }}</span>
+              <span>{{ preloadProgress }}%</span>
+            </div>
+            
+            <PressButton
+              type="button"
+              :disabled="!canPlay"
+              class="
+              relative
+              h-16 w-30 mx-auto my-4
+              rounded-full font-black text-xl tracking-wide text-white
+              border-4 border-amber-800
+              shadow-[0_4px_0_#bb4d00,0_14px_18px_rgba(0,0,0,0.18)]
+              transition-all duration-150
+              flex items-center justify-center 
+              bg-gradient-to-b from-amber-500 to-amber-800"
+              @click="startGame"
+            >
+              Jugar
+            </PressButton>
+            
+          </div>
+
       </div>
     </section>
 

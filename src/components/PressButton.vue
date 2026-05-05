@@ -36,7 +36,7 @@ function ensureSound() {
 function playSound() {
   const sound = ensureSound()
   sound.pause()
-  sound.currentTime = 0.18
+  sound.currentTime = 0
   void sound.play().catch(() => {})
 }
 
