@@ -12,7 +12,7 @@ export default defineConfig({
       includeAssets: ['favicon.svg'],
       manifest: {
         name: 'Tap the Rat',
-        short_name: 'TapTheRat',
+        short_name: 'TaptheRat',
         description: 'Mini juego casual de gato cazando ratones en una alacena.',
         theme_color: '#7c5338',
         background_color: '#efe1c3',
