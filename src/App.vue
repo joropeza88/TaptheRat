@@ -7,6 +7,7 @@ import ResultScreen from './components/ResultScreen.vue'
 import { LEVELS } from './game/config/levelsConfig'
 import type { GameScreen } from './game/models/GameState'
 import { useGameLoop } from './game/composables/useGameLoop'
+import { audioService } from './game/services/audioService'
 
 const currentLevelIndex = ref(0)
 const level = computed(() => LEVELS[currentLevelIndex.value])
@@ -14,19 +15,16 @@ const screen = ref<GameScreen>('home')
 const preloadProgress = ref(0)
 const game = useGameLoop(level)
 const rafId = ref<number | null>(null)
+const backgroundMusicKey = 'background-music'
 const imageAssetsToPreload = [
   '/favicon.svg',
-  '/pwa-192x192.svg',
-  '/pwa-512x512.svg',
-  '/images/cat_sprite.png',
-  '/images/game.png',
-  '/images/splash_screen.png',
-  '/images/out.png',
-  '/images/rat.png',
-  '/images/rat_bomb.png',
-  '/images/table.png',
-  '/icons/192.png',
-  '/icons/512.png'
+  '/images/cat_sprite.webp',
+  '/images/game.webp',
+  '/images/splash_screen.webp',
+  '/images/out.webp',
+  '/images/rat.webp',
+  '/images/rat_bomb.webp',
+  '/images/table.webp'
 ]
 const soundAssetsToPreload = [
   '/sounds/applause.mp3',
@@ -38,10 +36,6 @@ const soundAssetsToPreload = [
   '/sounds/victory.mp3'
 ]
 const assetsToPreload = [...imageAssetsToPreload, ...soundAssetsToPreload]
-let backgroundMusic: HTMLAudioElement | null = null
-let applauseSound: HTMLAudioElement | null = null
-let levelVictorySound: HTMLAudioElement | null = null
-let loseSound: HTMLAudioElement | null = null
 let resultScreenTimer: number | null = null
 
 const canPlay = computed(() => preloadProgress.value >= 100)
@@ -71,85 +65,27 @@ function clearResultScreenTimer() {
   }
 }
 
-function ensureBackgroundMusic() {
-  if (!backgroundMusic) {
-    backgroundMusic = new Audio('/sounds/music.mp3')
-    backgroundMusic.loop = true
-    backgroundMusic.preload = 'auto'
-    backgroundMusic.volume = 0.45
-  }
-
-  return backgroundMusic
-}
-
 function playBackgroundMusic() {
-  const music = ensureBackgroundMusic()
-
-  if (!music.paused) {
-    return
-  }
-
-  void music.play().catch(() => {})
+  audioService.playLoop(backgroundMusicKey, '/sounds/music.mp3', { volume: 0.45 })
 }
 
 function stopBackgroundMusic() {
-  if (!backgroundMusic) {
-    return
-  }
-
-  backgroundMusic.pause()
-  backgroundMusic.currentTime = 0
-}
-
-function ensureApplauseSound() {
-  if (!applauseSound) {
-    applauseSound = new Audio('/sounds/applause.mp3')
-    applauseSound.preload = 'auto'
-    applauseSound.volume = 0.8
-  }
-
-  return applauseSound
+  audioService.stopLoop(backgroundMusicKey)
 }
 
 function playApplauseSound() {
-  const applause = ensureApplauseSound()
-  applause.currentTime = 0
-  void applause.play().catch(() => {})
-}
-
-function ensureLevelVictorySound() {
-  if (!levelVictorySound) {
-    levelVictorySound = new Audio('/sounds/victory.mp3')
-    levelVictorySound.preload = 'auto'
-    levelVictorySound.volume = 0.8
-  }
-
-  return levelVictorySound
+  audioService.play('/sounds/applause.mp3', { volume: 0.8 })
 }
 
 function playLevelVictorySound() {
-  const victory = ensureLevelVictorySound()
-  victory.currentTime = 0
-  void victory.play().catch(() => {})
-}
-
-function ensureLoseSound() {
-  if (!loseSound) {
-    loseSound = new Audio('/sounds/lose.mp3')
-    loseSound.preload = 'auto'
-    loseSound.volume = 0.8
-  }
-
-  return loseSound
+  audioService.play('/sounds/victory.mp3', { volume: 0.8 })
 }
 
 function playLoseSound() {
-  const lose = ensureLoseSound()
-  lose.currentTime = 0
-  void lose.play().catch(() => {})
+  audioService.play('/sounds/lose.mp3', { volume: 0.8 })
 }
 
-function beginPreload() {
+async function beginPreload() {
   preloadProgress.value = 0
   let loaded = 0
 
@@ -158,27 +94,34 @@ function beginPreload() {
     return
   }
 
-  assetsToPreload.forEach((src) => {
-    const done = () => {
-      loaded += 1
-      preloadProgress.value = Math.round((loaded / assetsToPreload.length) * 100)
-    }
+  const done = () => {
+    loaded += 1
+    preloadProgress.value = Math.round((loaded / assetsToPreload.length) * 100)
+  }
 
-    if (src.startsWith('/sounds/')) {
-      const audio = new Audio()
-      audio.preload = 'auto'
-      audio.onloadeddata = done
-      audio.onerror = done
-      audio.src = src
-      audio.load()
-      return
-    }
+  const imagePromises = imageAssetsToPreload.map(
+    (src) =>
+      new Promise<void>((resolve) => {
+        const image = new Image()
+        image.onload = () => {
+          done()
+          resolve()
+        }
+        image.onerror = () => {
+          done()
+          resolve()
+        }
+        image.src = src
+      })
+  )
 
-    const image = new Image()
-    image.onload = done
-    image.onerror = done
-    image.src = src
+  const soundPromise = audioService.preload(soundAssetsToPreload, (audioLoaded) => {
+    while (loaded < imageAssetsToPreload.length + audioLoaded) {
+      done()
+    }
   })
+
+  await Promise.allSettled([...imagePromises, soundPromise])
 }
 
 function startGame() {
@@ -279,11 +222,14 @@ watch(
 )
 
 onMounted(() => {
-  beginPreload()
-  ensureBackgroundMusic()
-  ensureApplauseSound()
-  ensureLevelVictorySound()
-  ensureLoseSound()
+  void beginPreload()
+
+  const unlockAudio = () => {
+    void audioService.resume()
+  }
+
+  document.addEventListener('touchstart', unlockAudio, { once: true, passive: true })
+  document.addEventListener('pointerdown', unlockAudio, { once: true, passive: true })
 })
 
 onBeforeUnmount(() => {
@@ -299,9 +245,9 @@ onBeforeUnmount(() => {
       v-if="screen === 'home'"
       class="mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pb-6 pt-5"
     >
-      <div class="relative overflow-hidden flex min-h-[calc(100vh-2.75rem)] flex-col items-center justify-center rounded-[36px] border border-white/45 p-6 text-center shadow-[0_22px_42px_rgba(73,42,20,0.18)] bg-[url('/images/linebg.png')]">
+      <div class="relative overflow-hidden flex min-h-[calc(100vh-2.75rem)] flex-col items-center justify-center rounded-[36px] border border-white/45 p-6 text-center shadow-[0_22px_42px_rgba(73,42,20,0.18)] bg-[url('/images/linebg.webp')]">
 
-          <div class="absolute inset-0 pointer-events-none bg-[url('/images/splash_screen.png')] bg-no-repeat bg-center bg-cover"></div>
+          <div class="absolute inset-0 pointer-events-none bg-[url('/images/splash_screen.webp')] bg-no-repeat bg-center bg-cover"></div>
           
           <div class="relative z-20 text-center text-white p-4">
 
@@ -317,8 +263,8 @@ onBeforeUnmount(() => {
 
             <div class="mt-6 h-3 overflow-hidden rounded-full bg-amber-950/12">
               <div
-                class="h-full rounded-full bg-gradient-to-r from-orange-400 via-amber-500 to-lime-500 transition-[width] duration-150"
-                :style="{ width: `${preloadProgress}%` }"
+                class="h-full origin-left rounded-full bg-gradient-to-r from-orange-400 via-amber-500 to-lime-500 transition-transform duration-150"
+                :style="{ transform: `scaleX(${preloadProgress / 100})` }"
               />
             </div>
             <div class="flex items-center justify-between text-xs font-black uppercase tracking-[0.24em">
@@ -371,7 +317,7 @@ onBeforeUnmount(() => {
             flex items-center justify-center"
             @click="returnHome"
           >
-            <img src="/images/out.png" alt="Salir" class="h-8 w-8 object-contain" />
+            <img src="/images/out.webp" alt="Salir" class="h-8 w-8 object-contain" />
           </PressButton>
         </template>
       </GameHud>

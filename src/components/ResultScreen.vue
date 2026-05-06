@@ -39,7 +39,7 @@ defineEmits<{
 <template>
   <section class="mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pb-6 pt-5">
     <div
-      class="relative overflow-hidden flex min-h-[calc(100vh-2.75rem)] flex-col items-center justify-center rounded-[36px] border border-white/45 p-6 text-center shadow-[0_22px_42px_rgba(73,42,20,0.18)] bg-[url('/images/linebg.png')]"
+      class="relative overflow-hidden flex min-h-[calc(100vh-2.75rem)] flex-col items-center justify-center rounded-[36px] border border-white/45 p-6 text-center shadow-[0_22px_42px_rgba(73,42,20,0.18)] bg-[url('/images/linebg.webp')]"
     >
       <div v-if="celebration" class="pointer-events-none absolute inset-0 overflow-hidden">
         <div class="absolute left-1/2 top-1/2 h-0 w-0">

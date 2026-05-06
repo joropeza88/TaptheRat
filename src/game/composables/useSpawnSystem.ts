@@ -76,7 +76,6 @@ export function useSpawnSystem(level: ComputedRef<LevelConfig>, rows: number) {
 
   function damageRat(row: number, side: SpawnSide) {
     let pointsDelta = 0
-    let defeatedRatId: string | undefined
     let hit = false
 
     rats.value = rats.value.flatMap((rat) => {
@@ -88,7 +87,6 @@ export function useSpawnSystem(level: ComputedRef<LevelConfig>, rows: number) {
 
       if (rat.type === 'bomb') {
         pointsDelta = rat.points
-        defeatedRatId = rat.id
         return [
           {
             ...rat,
@@ -99,7 +97,6 @@ export function useSpawnSystem(level: ComputedRef<LevelConfig>, rows: number) {
       }
 
       pointsDelta = rat.points
-      defeatedRatId = rat.id
       return [
         {
           ...rat,
@@ -114,13 +111,8 @@ export function useSpawnSystem(level: ComputedRef<LevelConfig>, rows: number) {
 
     return {
       hit,
-      pointsDelta,
-      defeatedRatId
+      pointsDelta
     }
-  }
-
-  function activeRatsForRow(row: number) {
-    return rats.value.filter((rat) => rat.row === row)
   }
 
   return {
@@ -130,7 +122,6 @@ export function useSpawnSystem(level: ComputedRef<LevelConfig>, rows: number) {
     reset,
     trySpawn,
     removeExpired,
-    damageRat,
-    activeRatsForRow
+    damageRat
   }
 }

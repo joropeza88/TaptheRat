@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
+import { audioService } from '../game/services/audioService'
 
 const props = withDefaults(
   defineProps<{
@@ -10,7 +11,7 @@ const props = withDefaults(
   }>(),
   {
     disabled: false,
-    delayMs: 200,
+    delayMs: 120,
     soundSrc: '/sounds/button-press.mp3'
   }
 )
@@ -20,24 +21,10 @@ const emit = defineEmits<{
 }>()
 
 const isPressing = ref(false)
-let soundTemplate: HTMLAudioElement | null = null
 let timer: number | null = null
 
-function ensureSound() {
-  if (!soundTemplate) {
-    soundTemplate = new Audio(props.soundSrc)
-    soundTemplate.preload = 'auto'
-    soundTemplate.volume = 0.8
-  }
-
-  return soundTemplate
-}
-
 function playSound() {
-  const sound = ensureSound()
-  sound.pause()
-  sound.currentTime = 0
-  void sound.play().catch(() => {})
+  audioService.play(props.soundSrc, { volume: 0.8 })
 }
 
 function handleClick() {
@@ -47,10 +34,10 @@ function handleClick() {
 
   isPressing.value = true
   playSound()
+  emit('click')
 
   timer = window.setTimeout(() => {
     isPressing.value = false
-    emit('click')
     timer = null
   }, props.delayMs)
 }
@@ -58,6 +45,13 @@ function handleClick() {
 const buttonClass = computed(() =>
   isPressing.value ? 'scale-[0.96] brightness-95' : 'scale-100'
 )
+
+onBeforeUnmount(() => {
+  if (timer !== null) {
+    window.clearTimeout(timer)
+    timer = null
+  }
+})
 </script>
 
 <template>

@@ -10,11 +10,15 @@ const emit = defineEmits<{
 }>()
 
 function handleClick(event: MouseEvent) {
+  if (!props.rat || props.rat.isDying) {
+    return
+  }
+
   emit('attack', props.rat.row, props.rat.side, event.clientX, event.clientY)
 }
 
 function spriteBackground(type: RatInstance['type']) {
-  return type === 'bomb' ? "url('/images/rat_bomb.png')" : "url('/images/rat.png')"
+  return type === 'bomb' ? "url('/images/rat_bomb.webp')" : "url('/images/rat.webp')"
 }
 </script>
 

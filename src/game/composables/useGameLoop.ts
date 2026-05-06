@@ -34,11 +34,9 @@ export function useGameLoop(level: ComputedRef<LevelConfig>) {
     attackRow: null,
     spriteFrame: 1
   })
-  const statusMessage = ref('Toca un ratón para atacar.')
   const lastSpawnAt = ref(0)
   const startAt = ref(0)
   const attackTimer = ref<number | null>(null)
-  const statusTimer = ref<number | null>(null)
   const captures = ref(0)
 
   const spawnSystem = useSpawnSystem(level, GAME_CONFIG.boardRows)
@@ -54,22 +52,6 @@ export function useGameLoop(level: ComputedRef<LevelConfig>) {
     if (attackTimer.value) {
       window.clearTimeout(attackTimer.value)
     }
-
-    if (statusTimer.value) {
-      window.clearTimeout(statusTimer.value)
-    }
-  }
-
-  function setStatus(message: string) {
-    statusMessage.value = message
-
-    if (statusTimer.value) {
-      window.clearTimeout(statusTimer.value)
-    }
-
-    statusTimer.value = window.setTimeout(() => {
-      statusMessage.value = 'Mantén el ritmo y evita las trampas.'
-    }, GAME_CONFIG.statusMessageMs)
   }
 
   function resetGame() {
@@ -86,7 +68,6 @@ export function useGameLoop(level: ComputedRef<LevelConfig>) {
       attackRow: null,
       spriteFrame: 1
     }
-    statusMessage.value = 'Toca un ratón para atacar.'
   }
 
   function tick(now: number) {
@@ -133,18 +114,14 @@ export function useGameLoop(level: ComputedRef<LevelConfig>) {
     const result = spawnSystem.damageRat(row, side)
 
     if (!result.hit) {
-      setStatus('Golpe al aire.')
       return
     }
 
     if (result.pointsDelta < 0) {
-      setStatus('Bomba activada. Visibilidad reducida.')
       return
     }
 
     captures.value += 1
-
-    setStatus(`Captura ${captures.value}/${targetCaptures.value}.`)
   }
 
   return {
@@ -153,7 +130,6 @@ export function useGameLoop(level: ComputedRef<LevelConfig>) {
     spawnPoints: spawnSystem.spawnPoints,
     captures,
     progress,
-    statusMessage,
     isVictory,
     isDefeat,
     timeRemainingSec,

@@ -39,7 +39,7 @@ const containerStyle = computed(() => {
 })
 
 const spriteStyle = computed(() => ({
-  backgroundImage: "url('/images/cat_sprite.png')",
+  backgroundImage: "url('/images/cat_sprite.webp')",
   backgroundPosition: `${-(props.cat.spriteFrame - 1) * 400}px 0px`,
   backgroundSize: '2800px 400px'
 }))

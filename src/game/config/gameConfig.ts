@@ -30,7 +30,6 @@ export const GAME_CONFIG = {
   bombExplosionAnimationMs: 420,
   bombBlurOverlayMs: 2000,
   spawnIntervalMs: 680,
-  statusMessageMs: 900,
   boardRows: 3
 } as const
 

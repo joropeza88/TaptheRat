@@ -5,6 +5,7 @@ import SpawnPoint from './SpawnPoint.vue'
 import { GAME_CONFIG } from '../game/config/gameConfig'
 import type { AttackVector, CatState } from '../game/models/GameState'
 import type { RatInstance, SpawnPoint as SpawnPointModel } from '../game/models/Rat'
+import { audioService } from '../game/services/audioService'
 
 const props = defineProps<{
   cat: CatState
@@ -17,59 +18,96 @@ const emit = defineEmits<{
 }>()
 
 const rows = computed(() => [0, 1, 2])
+const sides = ['top', 'bottom'] as const
 const boardRef = ref<HTMLElement | null>(null)
-const scratches = ref<{ id: number; x: number; y: number; rotate: number }[]>([])
-const explosions = ref<{ id: number; x: number; y: number }[]>([])
+const scratches = ref(
+  Array.from({ length: 4 }, (_, index) => ({
+    slotId: index,
+    renderKey: 0,
+    visible: false,
+    x: 0,
+    y: 0,
+    rotate: 0
+  }))
+)
+const explosions = ref(
+  Array.from({ length: 3 }, (_, index) => ({
+    slotId: index,
+    renderKey: 0,
+    visible: false,
+    x: 0,
+    y: 0
+  }))
+)
 const bombOverlayActive = ref(false)
-let clawSoundTemplate: HTMLAudioElement | null = null
-let bombSoundTemplate: HTMLAudioElement | null = null
 let bombOverlayTimer: number | null = null
 const scratchTimers = new Set<number>()
 const explosionTimers = new Set<number>()
+let scratchCursor = 0
+let explosionCursor = 0
 
-function pointFor(row: number, side: SpawnPointModel['side']) {
-  return props.spawnPoints.find((point) => point.row === row && point.side === side)
-}
+const pointMap = computed(() => {
+  const next = new Map<string, SpawnPointModel>()
 
-function ratFor(row: number, side: SpawnPointModel['side']) {
-  return props.rats.find((rat) => rat.row === row && rat.side === side)
-}
-
-function playScratchSound() {
-  if (!clawSoundTemplate) {
-    clawSoundTemplate = new Audio('/sounds/claw.mp3')
-    clawSoundTemplate.preload = 'auto'
-    clawSoundTemplate.volume = 0.8
+  for (const point of props.spawnPoints) {
+    next.set(point.id, point)
   }
 
-  clawSoundTemplate.pause()
-  clawSoundTemplate.currentTime = 0
-  void clawSoundTemplate.play().catch(() => {})
+  return next
+})
+
+const ratMap = computed(() => {
+  const next = new Map<string, RatInstance>()
+
+  for (const rat of props.rats) {
+    next.set(`${rat.row}-${rat.side}`, rat)
+  }
+
+  return next
+})
+
+const slots = computed(() =>
+  rows.value.flatMap((row) =>
+    sides.map((side) => ({
+      id: `${row}-${side}`,
+      point: pointMap.value.get(`${row}-${side}`)!,
+      rat: ratMap.value.get(`${row}-${side}`),
+      row,
+      side
+    }))
+  )
+)
+
+const slotsByRow = computed(() =>
+  rows.value.map((row) => slots.value.filter((slot) => slot.row === row))
+)
+
+function playScratchSound() {
+  audioService.play('/sounds/claw.mp3', { volume: 0.8 })
 }
 
 function playBombSound() {
-  if (!bombSoundTemplate) {
-    bombSoundTemplate = new Audio('/sounds/bomb.mp3')
-    bombSoundTemplate.preload = 'auto'
-    bombSoundTemplate.volume = 0.9
-  }
-
-  bombSoundTemplate.pause()
-  bombSoundTemplate.currentTime = 0
-  void bombSoundTemplate.play().catch(() => {})
+  audioService.play('/sounds/bomb.mp3', { volume: 0.9 })
 }
 
 function addScratch(clientX: number, clientY: number, rect: DOMRect) {
   const x = ((clientX - rect.left) / rect.width) * 100
   const y = ((clientY - rect.top) / rect.height) * 100
-  const id = Date.now() + Math.floor(Math.random() * 1000)
   const rotate = x < 50 ? -16 : 16
+  const slotIndex = scratchCursor % scratches.value.length
+  const effect = scratches.value[slotIndex]
 
-  scratches.value = [...scratches.value, { id, x, y, rotate }]
+  scratchCursor += 1
+  effect.visible = false
+  effect.x = x
+  effect.y = y
+  effect.rotate = rotate
+  effect.renderKey += 1
+  effect.visible = true
   playScratchSound()
 
   const timer = window.setTimeout(() => {
-    scratches.value = scratches.value.filter((scratch) => scratch.id !== id)
+    effect.visible = false
     scratchTimers.delete(timer)
   }, GAME_CONFIG.scratchAnimationMs)
 
@@ -79,13 +117,19 @@ function addScratch(clientX: number, clientY: number, rect: DOMRect) {
 function addExplosion(clientX: number, clientY: number, rect: DOMRect) {
   const x = ((clientX - rect.left) / rect.width) * 100
   const y = ((clientY - rect.top) / rect.height) * 100
-  const id = Date.now() + Math.floor(Math.random() * 1000)
+  const slotIndex = explosionCursor % explosions.value.length
+  const effect = explosions.value[slotIndex]
 
-  explosions.value = [...explosions.value, { id, x, y }]
+  explosionCursor += 1
+  effect.visible = false
+  effect.x = x
+  effect.y = y
+  effect.renderKey += 1
+  effect.visible = true
   playBombSound()
 
   const timer = window.setTimeout(() => {
-    explosions.value = explosions.value.filter((explosion) => explosion.id !== id)
+    effect.visible = false
     explosionTimers.delete(timer)
   }, GAME_CONFIG.bombExplosionAnimationMs)
 
@@ -115,7 +159,7 @@ function handleAttack(row: number, side: SpawnPointModel['side'], clientX: numbe
   const rect = board.getBoundingClientRect()
   const centerX = rect.left + rect.width / 2
   const centerY = rect.top + rect.height / 2
-  const rat = ratFor(row, side)
+  const rat = ratMap.value.get(`${row}-${side}`)
 
   if (rat?.type === 'bomb') {
     addExplosion(clientX, clientY, rect)
@@ -141,8 +185,12 @@ onBeforeUnmount(() => {
     bombOverlayTimer = null
   }
 
-  scratches.value = []
-  explosions.value = []
+  scratches.value.forEach((effect) => {
+    effect.visible = false
+  })
+  explosions.value.forEach((effect) => {
+    effect.visible = false
+  })
   bombOverlayActive.value = false
 })
 </script>
@@ -154,7 +202,7 @@ onBeforeUnmount(() => {
   >
     <!-- Fondo lejano -->
     <div class="absolute inset-0 
-                bg-[url('/images/game.png')] 
+                bg-[url('/images/game.webp')] 
                 bg-cover 
                 bg-center
                 opacity-50
@@ -174,20 +222,21 @@ onBeforeUnmount(() => {
         class="relative flex h-[8.5rem] items-center overflow-visible"
       >
         <SpawnPoint
-          v-for="side in ['top', 'bottom']"
-          :key="`${row}-${side}`"
-          :point="pointFor(row, side)!"
-          :rat="ratFor(row, side)"
+          v-for="slot in slotsByRow[row]"
+          :key="slot.id"
+          :point="slot.point"
+          :rat="slot.rat"
           @attack="(attackRow, attackSide, clientX, clientY) => handleAttack(attackRow, attackSide, clientX, clientY)"
         />
-        <div class="wood-plank absolute inset-x-0 top-1/2 z-30 h-[5rem] -translate-y-1/2 bg-[url('/images/table.png')] bg-contain bg-center bg-no-repeat drop-shadow-lg bg-gradient-to-b from-white/20 to-transparent" />
+        <div class="wood-plank absolute inset-x-0 top-1/2 z-30 h-[5rem] -translate-y-1/2 bg-[url('/images/table.webp')] bg-contain bg-center bg-no-repeat drop-shadow-lg bg-gradient-to-b from-white/20 to-transparent" />
       </div>
 
       <CatPlayer :cat="cat" />
 
       <div
         v-for="scratch in scratches"
-        :key="scratch.id"
+        :key="`${scratch.slotId}-${scratch.renderKey}`"
+        v-show="scratch.visible"
         class="scratch-mark pointer-events-none absolute z-50"
         :style="{ left: `${scratch.x}%`, top: `${scratch.y}%`, transform: `translate(-50%, -50%) rotate(${scratch.rotate}deg)` }"
       >
@@ -198,7 +247,8 @@ onBeforeUnmount(() => {
 
       <div
         v-for="explosion in explosions"
-        :key="explosion.id"
+        :key="`${explosion.slotId}-${explosion.renderKey}`"
+        v-show="explosion.visible"
         class="bomb-burst pointer-events-none absolute z-50"
         :style="{ left: `${explosion.x}%`, top: `${explosion.y}%` }"
       >

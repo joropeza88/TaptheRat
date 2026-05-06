@@ -71,7 +71,6 @@ defineProps<{
         rounded-full
         bg-white/30
         px-4 py-3
-        backdrop-blur-xl
         border border-white/40
         shadow-[0_8px_30px_rgba(0,0,0,0.12)]
         ">
@@ -81,8 +80,8 @@ defineProps<{
         </div>
         <div class="h-3 overflow-hidden rounded-full bg-amber-950/10">
           <div
-            class="h-full rounded-full bg-gradient-to-r from-orange-400 via-amber-500 to-lime-500 transition-[width] duration-200"
-            :style="{ width: `${progress}%` }"
+            class="h-full origin-left rounded-full bg-gradient-to-r from-orange-400 via-amber-500 to-lime-500 transition-transform duration-200"
+            :style="{ transform: `scaleX(${progress / 100})` }"
           />
         </div>
       </div>

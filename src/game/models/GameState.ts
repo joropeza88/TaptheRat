@@ -32,11 +32,3 @@ export interface LevelConfig {
   activeSides: SpawnSide[]
   ratTypes: Record<RatType, number>
 }
-
-export interface AttackResult {
-  hit: boolean
-  side: SpawnSide
-  row: number
-  pointsDelta: number
-  defeatedRatId?: string
-}
