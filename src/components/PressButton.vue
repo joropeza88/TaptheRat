@@ -11,7 +11,7 @@ const props = withDefaults(
   }>(),
   {
     disabled: false,
-    delayMs: 120,
+    delayMs: 160,
     soundSrc: '/sounds/button-press.mp3'
   }
 )
