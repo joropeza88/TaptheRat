@@ -221,6 +221,29 @@ function returnHome() {
   beginPreload()
 }
 
+async function shareGame() {
+  const url = 'https://tapthe-rat.vercel.app/';
+  const title = 'Tap the Rat';
+  const text = 'Atrapa a los ratones antes de que escapen. ¿Puedes superarme?';
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title,
+        text,
+        url
+      });
+      return;
+    } catch {
+      // Si el usuario cancela o el sistema falla, intentamos el fallback web.
+    }
+  }
+
+  const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+  window.location.href = facebookShareUrl;
+}
+
+
 watch(
   () => game.isVictory.value,
   (value) => {
@@ -376,7 +399,7 @@ onBeforeUnmount(() => {
       :show-share-button="isFinalLevel"
       :celebration="isFinalLevel"
       @primary="currentLevelIndex < LEVELS.length - 1 ? nextLevel() : returnHome()"
-      @share="() => {}"
+      @share="shareGame()"
     />
 
     <ResultScreen

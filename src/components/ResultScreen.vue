@@ -96,13 +96,24 @@ defineEmits<{
       >
         {{ primaryLabel }}
       </PressButton>
+
       <button
         v-if="showShareButton"
-        class="mt-3 rounded-2xl border border-amber-950/15 bg-white/70 px-6 py-4 text-base font-black text-amber-950/80"
+        type="button"
+        class="
+          relative mx-auto flex w-50 py-3 items-center justify-center gap-3
+          rounded-full border border-white/12 bg-[linear-gradient(180deg,#1877f2_0%,#1459c6_100%)]
+          px-5 text-sm font-bold uppercase text-white
+          shadow-[0_14px_26px_rgba(24,119,242,0.28),inset_0_1px_0_rgba(255,255,255,0.18)]
+          transition-all duration-150
+          active:translate-y-[3px] active:shadow-[0_8px_16px_rgba(24,119,242,0.24)]
+        "
         @click="$emit('share')"
       >
-        Compartir
+        <span class="flex h-8 w-8 items-center justify-center rounded-full bg-white text-xl font-black text-[#1877f2]">f</span>
+        <span class="text-sm uppercase tracking-[0.22em]">Compartir</span>
       </button>
+
     </div>
   </section>
 </template>
