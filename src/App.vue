@@ -140,7 +140,7 @@ function startCurrentLevel() {
   clearResultScreenTimer()
   game.resetGame()
   screen.value = 'playing'
-  playBackgroundMusic()
+  //playBackgroundMusic()
   startLoop()
 }
 

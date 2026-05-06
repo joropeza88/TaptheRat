@@ -28,6 +28,7 @@ export const GAME_CONFIG = {
   ratDefeatAnimationMs: 420,
   scratchAnimationMs: 420,
   bombExplosionAnimationMs: 420,
+  bombVibrationMs: 18,
   bombBlurOverlayMs: 2000,
   spawnIntervalMs: 680,
   boardRows: 3

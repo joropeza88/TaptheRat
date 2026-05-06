@@ -90,6 +90,21 @@ function playBombSound() {
   audioService.play('/sounds/bomb.mp3', { volume: 0.9 })
 }
 
+function triggerBombVibration() {
+  try {
+    const supportsTouch = navigator.maxTouchPoints > 0
+      || window.matchMedia?.('(pointer: coarse)').matches
+
+    if (!supportsTouch || typeof navigator.vibrate !== 'function') {
+      return
+    }
+
+    navigator.vibrate(GAME_CONFIG.bombVibrationMs)
+  } catch {
+    // Ignore vibration failures on unsupported devices/browsers.
+  }
+}
+
 function addScratch(clientX: number, clientY: number, rect: DOMRect) {
   const x = ((clientX - rect.left) / rect.width) * 100
   const y = ((clientY - rect.top) / rect.height) * 100
@@ -127,6 +142,7 @@ function addExplosion(clientX: number, clientY: number, rect: DOMRect) {
   effect.renderKey += 1
   effect.visible = true
   playBombSound()
+  triggerBombVibration()
 
   const timer = window.setTimeout(() => {
     effect.visible = false

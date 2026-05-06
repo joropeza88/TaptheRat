@@ -83,7 +83,7 @@ defineEmits<{
       >
         {{ message }}
       </p>
-      <PressButton
+      <button
         class="relative
           h-16 w-50 mx-auto my-3
           rounded-full font-black text-xl tracking-wide text-white
@@ -95,7 +95,7 @@ defineEmits<{
         @click="$emit('primary')"
       >
         {{ primaryLabel }}
-      </PressButton>
+      </button>
 
       <button
         v-if="showShareButton"
