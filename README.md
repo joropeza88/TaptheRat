@@ -61,6 +61,7 @@ Efectos de sonido:
 - Autor: freesound_community 
 - Perfil: https://pixabay.com/es/users/freesound_community-46691455/
 - Sound: Applause, small audience
+- Sound: tick tock
 
 - Autor: floraphonic 
 - Perfil: https://pixabay.com/es/users/floraphonic-38928062/

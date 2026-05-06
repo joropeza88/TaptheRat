@@ -5,6 +5,7 @@ defineProps<{
   captures: number
   targetCaptures: number
   progress: number
+  isUrgent: boolean
 }>()
 </script>
 
@@ -47,14 +48,19 @@ defineProps<{
           relative
           h-16 w-30
           rounded-full
-          bg-[#f7f1dd]
-          border-4 border-amber-800 shadow-[0_4px_0_#bb4d00,0_14px_18px_rgba(0,0,0,0.18)]
+          border-4 shadow-[0_4px_0_#bb4d00,0_14px_18px_rgba(0,0,0,0.18)]
           transition-all duration-150
           flex items-center justify-center
         "
+        :class="
+          isUrgent
+            ? 'timer-alert border-red-800 bg-[#ffe1dd]'
+            : 'border-amber-800 bg-[#f7f1dd]'
+        "
       >
         <span
-          class="font-black text-xl tracking-wide text-[#6f4a2f]"
+          class="font-black text-xl tracking-wide"
+          :class="isUrgent ? 'text-red-900' : 'text-[#6f4a2f]'"
         >
           {{ timeRemainingSec }}s
         </span>
@@ -88,3 +94,28 @@ defineProps<{
     </div>
   </footer>
 </template>
+
+<style scoped>
+.timer-alert {
+  animation: timer-wobble 0.45s ease-in-out infinite;
+}
+
+@keyframes timer-wobble {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  25% {
+    transform: rotate(-4deg) scale(1.03);
+  }
+
+  50% {
+    transform: rotate(0deg) scale(1.05);
+  }
+
+  75% {
+    transform: rotate(4deg) scale(1.03);
+  }
+}
+</style>

@@ -115,6 +115,10 @@ class AudioService {
       return
     }
 
+    if (this.loopHandles.has(key)) {
+      return
+    }
+
     this.stopLoop(key)
 
     const { context, masterGain } = this.ensureContext()

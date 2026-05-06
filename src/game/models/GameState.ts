@@ -1,7 +1,7 @@
 import type { RatType, SpawnSide } from './Rat'
 
 export type CatDirection = 'idle' | 'left' | 'right' | 'top' | 'bottom'
-export type GameScreen = 'home' | 'playing' | 'victory' | 'defeat'
+export type GameScreen = 'home' | 'level-select' | 'playing' | 'victory' | 'defeat'
 
 export interface AttackVector {
   x: number

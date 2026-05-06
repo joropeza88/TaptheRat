@@ -2,19 +2,31 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import GameBoard from './components/GameBoard.vue'
 import GameHud from './components/GameHud.vue'
+import LevelSelectScreen from './components/LevelSelectScreen.vue'
 import PressButton from './components/PressButton.vue'
 import ResultScreen from './components/ResultScreen.vue'
 import { LEVELS } from './game/config/levelsConfig'
 import type { GameScreen } from './game/models/GameState'
 import { useGameLoop } from './game/composables/useGameLoop'
 import { audioService } from './game/services/audioService'
+import {
+  loadProgress,
+  markGameStarted,
+  unlockLevel,
+  type ProgressState
+} from './game/services/progressService'
 
 const currentLevelIndex = ref(0)
 const level = computed(() => LEVELS[currentLevelIndex.value])
 const screen = ref<GameScreen>('home')
 const preloadProgress = ref(0)
+const progress = ref<ProgressState>({
+  highestUnlockedLevel: 1,
+  hasStarted: false
+})
 const game = useGameLoop(level)
 const rafId = ref<number | null>(null)
+const hasPlayedClockAlert = ref(false)
 const backgroundMusicKey = 'background-music'
 const imageAssetsToPreload = [
   '/favicon.svg',
@@ -31,6 +43,7 @@ const soundAssetsToPreload = [
   '/sounds/bomb.mp3',
   '/sounds/button-press.mp3',
   '/sounds/claw.mp3',
+  '/sounds/clock.mp3',
   '/sounds/lose.mp3',
   '/sounds/music.mp3',
   '/sounds/victory.mp3'
@@ -40,6 +53,9 @@ let resultScreenTimer: number | null = null
 
 const canPlay = computed(() => preloadProgress.value >= 100)
 const isFinalLevel = computed(() => currentLevelIndex.value === LEVELS.length - 1)
+const isUrgentTimer = computed(
+  () => screen.value === 'playing' && game.timeRemainingSec.value > 0 && game.timeRemainingSec.value <= 10
+)
 
 function animate() {
   game.tick(performance.now())
@@ -129,23 +145,44 @@ async function beginPreload() {
 }
 
 function startGame() {
+  progress.value = markGameStarted(LEVELS.length)
+  currentLevelIndex.value = 0
+  startCurrentLevel()
+}
+
+function startCurrentLevel() {
   clearResultScreenTimer()
+  hasPlayedClockAlert.value = false
   game.resetGame()
   screen.value = 'playing'
   playBackgroundMusic()
   startLoop()
 }
 
-function startCurrentLevel() {
-  clearResultScreenTimer()
-  game.resetGame()
-  screen.value = 'playing'
-  //playBackgroundMusic()
-  startLoop()
-}
-
 function retryLevel() {
   startCurrentLevel()
+}
+
+function openLevel(levelNumber: number) {
+  currentLevelIndex.value = Math.min(Math.max(levelNumber - 1, 0), LEVELS.length - 1)
+  startCurrentLevel()
+}
+
+function openLevelSelect() {
+  clearResultScreenTimer()
+  stopLoop()
+  game.resetGame()
+  screen.value = 'level-select'
+  playBackgroundMusic()
+}
+
+function handlePlayFromHome() {
+  if (progress.value.highestUnlockedLevel <= 1) {
+    startGame()
+    return
+  }
+
+  openLevelSelect()
 }
 
 function nextLevel() {
@@ -163,7 +200,6 @@ function returnHome() {
   stopLoop()
   stopBackgroundMusic()
   game.resetGame()
-  currentLevelIndex.value = 0
   screen.value = 'home'
   beginPreload()
 }
@@ -192,9 +228,24 @@ async function shareGame() {
 
 
 watch(
+  () => game.timeRemainingSec.value,
+  (value) => {
+    if (screen.value !== 'playing' || value > 10 || value <= 0 || hasPlayedClockAlert.value) {
+      return
+    }
+
+    hasPlayedClockAlert.value = true
+    audioService.play('/sounds/clock.mp3', { volume: 1 })
+  }
+)
+
+watch(
   () => game.isVictory.value,
   (value) => {
     if (value && screen.value === 'playing') {
+      hasPlayedClockAlert.value = false
+      const nextUnlockedLevel = Math.min(currentLevelIndex.value + 2, LEVELS.length)
+      progress.value = unlockLevel(nextUnlockedLevel, LEVELS.length)
       stopLoop()
       clearResultScreenTimer()
 
@@ -217,6 +268,7 @@ watch(
   () => game.isDefeat.value,
   (value) => {
     if (value && screen.value === 'playing') {
+      hasPlayedClockAlert.value = false
       clearResultScreenTimer()
       stopLoop()
       playLoseSound()
@@ -226,6 +278,7 @@ watch(
 )
 
 onMounted(() => {
+  progress.value = loadProgress(LEVELS.length)
   void beginPreload()
 
   const unlockAudio = () => {
@@ -288,7 +341,7 @@ onBeforeUnmount(() => {
               transition-all duration-150
               flex items-center justify-center 
               bg-gradient-to-b from-amber-500 to-amber-800"
-              @click="startGame"
+              @click="handlePlayFromHome"
             >
               Jugar
             </PressButton>
@@ -297,6 +350,14 @@ onBeforeUnmount(() => {
 
       </div>
     </section>
+
+    <LevelSelectScreen
+      v-else-if="screen === 'level-select'"
+      :levels="LEVELS"
+      :highest-unlocked-level="progress.highestUnlockedLevel"
+      @select="openLevel"
+      @exit="returnHome"
+    />
 
     <section
       v-else-if="screen === 'playing'"
@@ -308,6 +369,7 @@ onBeforeUnmount(() => {
         :captures="game.captures.value"
         :target-captures="game.targetCaptures.value"
         :progress="game.progress.value"
+        :is-urgent="isUrgentTimer"
       >
         <template #left>
           <PressButton
