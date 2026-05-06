@@ -87,16 +87,18 @@ function playLoseSound() {
 
 async function beginPreload() {
   preloadProgress.value = 0
-  let loaded = 0
+  let loadedImages = 0
+  let loadedSounds = 0
+  const totalAssets = assetsToPreload.length
 
-  if (assetsToPreload.length === 0) {
+  if (totalAssets === 0) {
     preloadProgress.value = 100
     return
   }
 
-  const done = () => {
-    loaded += 1
-    preloadProgress.value = Math.round((loaded / assetsToPreload.length) * 100)
+  const updateProgress = () => {
+    const loaded = loadedImages + loadedSounds
+    preloadProgress.value = Math.min(100, Math.round((loaded / totalAssets) * 100))
   }
 
   const imagePromises = imageAssetsToPreload.map(
@@ -104,11 +106,13 @@ async function beginPreload() {
       new Promise<void>((resolve) => {
         const image = new Image()
         image.onload = () => {
-          done()
+          loadedImages += 1
+          updateProgress()
           resolve()
         }
         image.onerror = () => {
-          done()
+          loadedImages += 1
+          updateProgress()
           resolve()
         }
         image.src = src
@@ -116,12 +120,12 @@ async function beginPreload() {
   )
 
   const soundPromise = audioService.preload(soundAssetsToPreload, (audioLoaded) => {
-    while (loaded < imageAssetsToPreload.length + audioLoaded) {
-      done()
-    }
+    loadedSounds = audioLoaded
+    updateProgress()
   })
 
   await Promise.allSettled([...imagePromises, soundPromise])
+  preloadProgress.value = 100
 }
 
 function startGame() {
