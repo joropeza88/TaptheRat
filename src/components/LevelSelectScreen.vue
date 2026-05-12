@@ -5,6 +5,7 @@ import PressButton from './PressButton.vue'
 defineProps<{
   levels: LevelConfig[]
   highestUnlockedLevel: number
+  completedLevels: number[]
 }>()
 
 defineEmits<{
@@ -29,7 +30,7 @@ defineEmits<{
           :disabled="level.number > highestUnlockedLevel"
           class="flex aspect-square flex-col items-center justify-center rounded-[28px] border-4 px-2 text-center font-black uppercase transition-all duration-150"
           :class="
-            level.number < highestUnlockedLevel
+            completedLevels.includes(level.number)
               ? 'border-amber-800 bg-gradient-to-b from-amber-500 to-amber-800 text-white shadow-[0_4px_0_#bb4d00,0_14px_18px_rgba(0,0,0,0.18)] active:scale-[0.96]'
               : level.number === highestUnlockedLevel
                 ? 'border-amber-700 bg-gradient-to-b from-amber-300 to-amber-600 text-black shadow-[0_4px_0_#b7791f,0_14px_18px_rgba(0,0,0,0.18)] active:scale-[0.96]'
@@ -37,7 +38,7 @@ defineEmits<{
           "
           @click="level.number <= highestUnlockedLevel && $emit('select', level.number)"
         >
-          <template v-if="level.number < highestUnlockedLevel">
+          <template v-if="completedLevels.includes(level.number)">
             <span class="text-2xl font-black leading-none">{{ level.number }}</span>
             <span class="mt-2 text-xs leading-none">Cursado</span>
           </template>

@@ -10,9 +10,9 @@ import type { GameScreen } from './game/models/GameState'
 import { useGameLoop } from './game/composables/useGameLoop'
 import { audioService } from './game/services/audioService'
 import {
+  completeLevel,
   loadProgress,
   markGameStarted,
-  unlockLevel,
   type ProgressState
 } from './game/services/progressService'
 
@@ -22,6 +22,7 @@ const screen = ref<GameScreen>('home')
 const preloadProgress = ref(0)
 const progress = ref<ProgressState>({
   highestUnlockedLevel: 1,
+  completedLevels: [],
   hasStarted: false
 })
 const game = useGameLoop(level)
@@ -244,8 +245,7 @@ watch(
   (value) => {
     if (value && screen.value === 'playing') {
       hasPlayedClockAlert.value = false
-      const nextUnlockedLevel = Math.min(currentLevelIndex.value + 2, LEVELS.length)
-      progress.value = unlockLevel(nextUnlockedLevel, LEVELS.length)
+      progress.value = completeLevel(currentLevelIndex.value + 1, LEVELS.length)
       stopLoop()
       clearResultScreenTimer()
 
@@ -355,6 +355,7 @@ onBeforeUnmount(() => {
       v-else-if="screen === 'level-select'"
       :levels="LEVELS"
       :highest-unlocked-level="progress.highestUnlockedLevel"
+      :completed-levels="progress.completedLevels"
       @select="openLevel"
       @exit="returnHome"
     />
